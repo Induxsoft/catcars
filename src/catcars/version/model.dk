@@ -1,0 +1,25 @@
+#include "dkli.dkh"
+#!
+module ""
+{
+    @table_name="car_version"
+    like=" and if(ifnull(@s,'')='',true,concat_ws('',v.codigo,v.descripcion,v.ano,m.codigo,m.descripcion,cm.codigo,cm.descripcion) like concat('%',@s,'%')  )"
+    @list_query="select v.*,cm.codigo codmarca,cm.descripcion descmarca,m.codigo codmodelo,m.descripcion descmodelo
+    from #<@table_name> v inner join car_modelo m on v.ref_car_modelo=m.sys_pk
+    inner join car_marca cm on m.ref_car_marca=cm.sys_pk
+    where ifnull(v.sys_deleted,0)=0  "+like
+    
+    prepareView::&db,&params,&rec
+    {
+        if isnull(rec){return}
+         rec<"marcas*">:dbr.list(db,"select * from car_marca where ifnull(sys_deleted,0)=0",params)
+    }
+    blank::&db,&params
+    {
+       new entity{@"codigo":""}
+       do prepareView(db,params,entity)
+       return entity
+    }
+    
+    point @blank to blank
+}

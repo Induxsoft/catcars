@@ -1,0 +1,75 @@
+#include "ddm.dkh"
+model "name"
+{
+    #include "induxsoft.abstracts.ddm"
+    entity "producto":"TableModel"{}
+    
+    entity "car_marca":"TableModel"
+    {
+        @"codigo" string(15) unique required
+        @"descripcion" string(50) required
+        @"url" string(1024)
+    }
+
+    entity "car_modelo":"TableModel"
+    {
+        @"codigo" string(15) unique required
+        @"descripcion" string(50) required
+        @"ref_car_marca" ref:"car_marca" required
+    }
+
+    entity "car_version":"TableModel"
+    {
+        @"codigo" string(15) unique required
+        @"descripcion" string(50) required
+        @"ref_car_modelo" ref:"car_modelo" required
+        @"ano" int required
+    }
+
+    entity "car_compatible":"TableModel"
+    {
+        @"ref_producto" ref:"producto" required
+        @"ref_modelo" ref:"car_modelo" required
+        @"ref_version" ref:"car_version"
+        @"ano" int required // Si ref_version!=null : ano=ref_version.ano
+        
+        index "car_compatible_idx1" unique
+        {
+            field "ref_producto"
+            field "ref_modelo"
+            field "ref_version"
+            field "ano"
+        }
+        
+        index "car_compatible_idx2"
+        {
+            field "ano"
+        }
+    }
+     // Información de la aplicación
+    entity "sys_app_catalog"
+    {
+        @"pack_id" string(32) required
+        @"app_id" string(32) key
+        @"app_title" string(255)
+        @"created" datetime required
+        @"app_info" mmemo
+    }
+    // Categoria de la aplicación
+    entity "sys_app_category"
+    {
+        @"id" string(32) key
+        @"title" string(255) required
+    }
+    // Recursos de la aplicación
+    entity "sys_app_shortcut" 
+    {
+        @"id" string(32) key
+        @"title" string(255) required
+        @"icon96x96" string(1024) required
+        @"src" string(1024) required
+        @"_blank" bool
+        @"appid" ref : "sys_app_catalog"
+        @"cat" ref :"sys_app_category"
+    }
+}

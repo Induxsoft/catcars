@@ -1,0 +1,8 @@
+#include "dkli.dkh"
+#!
+module ""
+{
+    @table_name="car_marca"
+    like=" and if(ifnull(@s,'')='',true,concat_ws('',codigo,descripcion,url) like concat('%',@s,'%')  )"
+    @list_query="select * from #<@table_name> where ifnull(sys_deleted,0)=0 "+ like
+}

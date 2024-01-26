@@ -1,0 +1,27 @@
+#include "dkli.dkh"
+#!
+module ""
+{
+    switch @@(@http_context,"$request/get/_view")
+    {
+        case "buscar-producto"
+        {
+            point @list to car.buscarProducto
+            break
+        }
+        case "buscar-modelo"
+        {
+            point @list to car.buscarModelo
+            break
+        }
+        default
+        {
+            point @list to car.list
+            point @read to car.read
+            point @blank to car.blank
+            point @create to car.create
+            point @update to car.update
+            break
+        }
+    }
+}

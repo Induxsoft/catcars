@@ -30,6 +30,7 @@ module "Controller configs"
 	do crudl.routes.entity("/marca/","marca")
 	do crudl.routes.entity("/modelo/","modelo")
 	do crudl.routes.entity("/version/","version")
+	do crudl.routes.entity("/compatibilidad/","compatibilidad")
 
 	@base_path="catcars"
 	@path_root="" // Establezca una ruta de ser necesario

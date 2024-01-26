@@ -1,0 +1,199 @@
+#include "dkli.dkh"
+#!
+module ""
+{
+    @table_name = "car_compatible"
+    @list_query = "
+    SELECT
+        c.sys_pk,
+        p.descripcion AS `producto`,
+        m.descripcion AS `modelo`,
+        IFNULL(v.descripcion,'') AS `version`,
+        c.ano AS anio
+    FROM #<@table_name> AS c
+        INNER JOIN producto AS p ON c.ref_producto = p.sys_pk
+        INNER JOIN car_modelo AS m ON c.ref_modelo = m.sys_pk
+        LEFT JOIN car_version AS v ON c.ref_version = v.sys_pk
+    WHERE NOT IFNULL(c.sys_deleted,0)
+    "
+    @read_query = "
+    SELECT
+        sys_pk,
+        sys_guid,
+        sys_recver,
+        ref_producto,
+        ref_modelo,
+        ref_version,
+        ano
+    FROM #<@table_name>
+    WHERE #<@keyfield> = @_entity_id
+    "
+
+    car.buscarProducto::&db,&params
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM producto WHERE #<condition>"
+        
+        if trim(@@(params,"$id")) != "" {
+            condition = "(sys_pk = @id OR sys_guid = @id)"
+            return dbr.rec(db,ftext(sql),params)
+        }
+        if trim(@@(params,"$search")) != "" {
+            condition = "(codigo LIKE CONCAT('%',@search,'%') OR descripcion LIKE CONCAT('%',@search,'%'))"
+            return dbr.list(db,ftext(sql),params)
+        }
+
+        return list.create()
+    }
+
+    car.buscarModelo::&db,&params
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM car_modelo WHERE #<condition>"
+        
+        if trim(@@(params,"$id")) != "" {
+            condition = "(sys_pk = @id OR sys_guid = @id)"
+            return dbr.rec(db,ftext(sql),params)
+        }
+        if trim(@@(params,"$search")) != "" {
+            condition = "(codigo LIKE CONCAT('%',@search,'%') OR descripcion LIKE CONCAT('%',@search,'%'))"
+            return dbr.list(db,ftext(sql),params)
+        }
+
+        return list.create()
+    }
+
+    car.obtenerProducto::&db,id
+    {
+        new params { @"id":id }
+        return car.buscarProducto(db,params)
+    }
+
+    car.obtenerModelo::&db,id
+    {
+        new params { @"id":id }
+        return car.buscarModelo(db,params)
+    }
+
+    prepareView::&db,&params,&data
+    {
+        isNew = (@@(params,"$_entity_id") == "_new")
+
+        switch @@(@http_context,"$request/get/_view")
+        {
+            case ""
+            {
+                sql_versions = "SELECT sys_pk, codigo, descripcion, ano FROM car_version WHERE NOT IFNULL(sys_deleted,0)"
+
+                if not(isNew) || field.exist(data,"form")
+                {
+                    ref_producto = @@(data,"#form/ref_producto")
+                    ref_modelo = @@(data,"#form/ref_modelo")
+
+                    if ref_producto <= 0 { ref_producto = @@(data,"#entity/ref_producto") }
+                    if ref_modelo <= 0 { ref_modelo = @@(data,"#entity/ref_modelo") }
+
+                    data<"producto*"> : car.obtenerProducto(db,ref_producto)
+                    data<"modelo*"> : car.obtenerModelo(db,ref_modelo)
+                }
+
+                data<"list_version*"> : dbr.list(db,sql_versions,@null)
+                break
+            }
+        }
+    }
+
+    car.list::&db,&params
+    {
+        if trim(@@(params,"$s")) != "" 
+        {
+            @list_query = @list_query + " AND (
+                p.descripcion LIKE CONCAT('%',@s,'%')
+                OR m.descripcion LIKE CONCAT('%',@s,'%')
+                OR v.descripcion LIKE CONCAT('%',@s,'%')
+            )"
+        }
+        
+        // do rise_error(0,@list_query)
+        return entity.list(db,params)
+    }
+
+    car.read::&db,&params
+    {
+        new data
+        {
+            @"entity*": entity.read(db,params)
+        }
+        do prepareView(db,params,data)
+
+        return data
+    }
+
+    car.blank::&db,&params
+    {
+        new data {}
+        do prepareView(db,params,data)
+        return data
+    }
+
+    car.vData::&db,&params,&data
+    {
+        new car_compatible
+        {
+            @"sys_recver": @@(data,"#sys_recver")
+            @"ref_producto": @@(data,"#ref_producto")
+            @"ref_modelo": @@(data,"#ref_modelo")
+            @"ref_version": @@(data,"#ref_version")
+            @"ano": @@(data,"#ano")
+        }
+
+        if @@(car_compatible,"#ref_producto") <= 0 { do rise_error(500,"Es necesario elegir el <strong>Producto</strong>.") }
+        if @@(car_compatible,"#ref_modelo") <= 0 { do rise_error(500,"Es necesario elegir el <strong>Modelo</strong>.") }
+        if @@(car_compatible,"#ref_version") <= 0 { car_compatible<"ref_version*"> : @null }
+        if @@(car_compatible,"#ano") <= 0 { do rise_error(500,"El campo <strong>Año</strong> es requerido.") }
+
+        return car_compatible
+    }
+
+    car.create::&db,&params,&data
+    {
+        do errordet(@false)
+        ref car_compatible = car.vData(db,params,data)
+        do entity.create(db,params,car_compatible)
+
+        exception
+        {
+            if dbr.in_transaction(db) { do dbr.rollback(db) }
+
+            ref formData = record.copy(data,"*")
+            code = last_error_code()
+            error = last_error()
+
+            do record.clear(data)
+            data<"form*"> : formData
+            
+            do prepareView(db,params,data)
+            do rise_error(code,error)
+        }
+    }
+
+    car.update::&db,&params,&data
+    {
+        do errordet(@false)
+        ref car_compatible = car.vData(db,params,data)
+        do entity.update(db,params,car_compatible)
+
+        exception
+        {
+            if dbr.in_transaction(db) { do dbr.rollback(db) }
+
+            ref formData = record.copy(data,"*")
+            code = last_error_code()
+            error = last_error()
+
+            do record.clear(data)
+            data<"form*"> : formData
+            
+            do prepareView(db,params,data)
+            do rise_error(code,error)
+        }
+    }
+}

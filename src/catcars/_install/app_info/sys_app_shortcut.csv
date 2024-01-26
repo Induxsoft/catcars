@@ -1,0 +1,5 @@
+"id","title","icon96x96","src","_blank","appid","cat"
+"marca.list","Marcas de vehículos","/$/catcars/img/icons/marca-96x96.png","/!/catcars/marca/","0","catcars.marcas","0090"
+"modelo.list","Modelos de vehículos","/$/catcars/img/icons/modelo-96x96.png","/!/catcars/modelo/","0","catcars.modelos","0090"
+"version.list","Versiones de vehículos","/$/catcars/img/icons/version-96x96.png","/!/catcars/version/","0","catcars.version","0090"
+"compatibilidad.list","Compatibilidad de partes","/$/catcars/img/icons/compatibilidad-96x96.png","/!/catcars/compatibilidad/","0","catcars.compatibilidad","0090"

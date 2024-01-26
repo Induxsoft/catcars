@@ -2,7 +2,49 @@
 model "name"
 {
     #include "induxsoft.abstracts.ddm"
-    entity "producto":"TableModel"{}
+    
+    //* ======================================== [ DEPENDENCIAS (FK) ]
+    entity "cclaseproducto" : "EnumModel" {}
+    entity "ctipoproducto" : "EnumModel" {}
+    entity "cmetodosvaluacion" : "EnumModel" {}
+
+    entity "divisa" : "TableModel"
+    {
+        @"codigo" string(5) unique required
+        @"descripcion" string(30) unique required
+        @"tcambio" decimal(18,8)
+    }
+
+    entity "linea": "TableModel"
+    {
+        @"clase" ref:"cclaseproducto" required
+        @"codigo" string(15) unique required
+        @"descripcion" string(50) unique required
+    }
+
+    entity "cfgimpuesto" : "TableModel"
+    {
+        @"nombre" string(25) unique required
+    }
+    
+    entity "producto" : "TableModel"
+    {
+        @"codigo" string(35) unique required
+        @"descripcion" string(150) unique required
+        @"iclase" ref:"cclaseproducto" required
+        @"itipo" ref:"ctipoproducto" required
+        @"metodovaluacion" ref:"cmetodosvaluacion" required
+        @"reqlote" bool required
+        @"reqserie" bool required
+        @"unidad" string(10) required
+        @"idivisa" ref:"divisa" required
+        @"ilinea" ref:"linea" required
+        @"impuestos" ref:"cfgimpuesto" required
+        @"uf_sat_proser" string(50) required
+        @"uf_sat_uniproser" string(50) required
+    }
+
+    //* ======================================== [ ENTIDADES PRINCIPALES ]
     
     entity "car_marca":"TableModel"
     {
@@ -46,7 +88,9 @@ model "name"
             field "ano"
         }
     }
-     // Información de la aplicación
+
+    //* ======================================== [ ... ]
+    // Información de la aplicación
     entity "sys_app_catalog"
     {
         @"pack_id" string(32) required

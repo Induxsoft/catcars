@@ -1,0 +1,127 @@
+#include "dkli.dkh"
+#!
+module "form.dk"
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "uielements.dkl"
+    #include "../config.dk"
+    #include "../lib.dk"
+
+    do @context.begin(@crud_context)
+    
+    ref entity = ifnull(@("&./entity"),record.create())
+    ref producto = ifnull(@("&./producto"),record.create())
+    ref modelo = ifnull(@("&./modelo"),record.create())
+    ref listVersion = ifnull(@("&./list_version"),list.create())
+
+    @_entity_id = @("$parameters/_entity_id")
+    // do rise_error(0,to.json(@("&.")))
+
+    new sel_version
+    {
+        @"datatable*": listVersion
+        @"id": "sel_version"
+        new member "attributes"
+        {
+            @"class": "form-select rounded-0"
+            @"name": "ref_version"
+        }
+        @"value_field": "sys_pk"
+        @"text_field": "descripcion"
+        new member "attr_options"
+        {
+            @"data-year": "#<@@(row,'ano')>"
+        }
+        @"first_value": "0"
+        @"first_text": "Seleccione la version"
+        @"selected": form("ref_version","nm",entity)
+    }
+
+    isNew = (@_entity_id == "_new")
+
+    #$ div(class="container p-0")
+    {
+        form(action="." method="POST")
+        {
+            div(id="main_bar" class="row container-section my-2 px-0 py-2 border-bottom")
+            {
+                div(class="col-4 d-flex align-items-center p-0")
+                {
+                    h5(class="tex-no-break m-0"){$"#<ifstr(isNew,'Agregar','Editar')>"}
+                }
+                div(class="col-8 d-flex align-items-center justify-content-end p-0 gap-2" id="main_bar_controls")
+                {
+                    a(href="./" class="btn btn-sm border-secondary induxsoft-corners btn-main-action"){$"#<@@(@icons,'ARROW_CLOCKWISE')>"}
+                    button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action"){$"#<@@(@icons,'save')>"}
+                    a(href="#<@CAR_COMPATIBILIDAD>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action"){$"#<@@(@icons,'X')>"}
+                }
+            }
+
+            div(id="work_area" class="container-section")
+            {
+                input(type="hidden" name="sys_recver" value="#<@@(entity,'#sys_recver')>")
+
+                div(class="#<ifstr(@('error/message')!='','alert alert-danger','')>"){$"#<@('error/message')>"}
+                div(class="row")
+                {
+                    div(class="col-12")
+                    {
+                        label(class="form-label fw-bold"){$"Producto:"}
+                        "input-key"(id="ik_producto" name="ref_producto" "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion"
+                            "data-value"="#<to.json(producto)>" "data-source"="#<@URL_SEARCH_PRODUCTO>"
+                            columns="codigo,descripcion"
+                            colcaptions="Código,Descripcion"
+                            "box-title-text"="Seleccione un producto"
+                            "box-placeholder-text"="Buscar productos"
+                            "box-nodata-text"="No se encontraron registros para mostrar"
+                            required="true"
+                        ){$""}
+                    }
+                    div(class="col-12")
+                    {
+                        label(class="form-label fw-bold"){$"Modelo:"}
+                        "input-key"(id="ik_modelo" name="ref_modelo" "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion"
+                            "data-value"="#<to.json(modelo)>" "data-source"="#<@URL_SEARCH_MODELO>"
+                            columns="codigo,descripcion"
+                            colcaptions="Código,Descripcion"
+                            "box-title-text"="Seleccione un registro"
+                            "box-placeholder-text"="Buscar modelos"
+                            "box-nodata-text"="No se encontraron registros para mostrar"
+                            required="true"
+                        ){$""}
+                    }
+                    div(class="col-lg-8 col-md-8 col-sm-8")
+                    {
+                        label(class="form-label"){"Version:"}
+                        ##
+                        do uie.dbSelect(sel_version)
+                        ##
+                    }
+                    div(class="col-lg-4 col-md-4 col-sm-4")
+                    {
+                        label(class="form-label fw-bold"){"Año:"}
+                        input(class="form-control rounded-0" type="number" name="ano" value="#<form('ano','nm',entity)>" id="txt_anio" required="true")
+                    }
+                }
+            }
+        }
+
+        div
+        {
+            script(type="text/javascript")
+            {$'
+                document.addEventListener("DOMContentLoaded", () => {
+                    let sel_version = document.getElementById("sel_version");
+
+                    sel_version.addEventListener("change", (event) => {
+                        let option = sel_version.options[sel_version.selectedIndex];
+                        let year_version = Number(option.getAttribute("data-year"));
+
+                        document.getElementById("txt_anio").value = year_version;
+                    });
+                });
+            '}
+        }
+    }
+}

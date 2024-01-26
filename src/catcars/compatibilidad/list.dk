@@ -1,0 +1,87 @@
+#include "dkli.dkh"
+#!
+module "list.dk"
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "uielements.v12.dkl"
+    #include "../config.dk"
+
+    do @context.begin(@crud_context)
+
+    form_bar_buttons::
+    {
+        _btn_cls = "btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"
+        #$
+        a(href="./_new/" class="#<_btn_cls>"){$"Agregar"}
+        a(href="#<@CATCARS_MARCA>" class="#<_btn_cls>"){$"Marcas"}
+        a(href="#<@CATCARS_MODELO>" class="#<_btn_cls>"){$"Modelos"}
+        a(href="#<@CATCARS_VERSION>" class="#<_btn_cls>"){$"Versiones"}
+        #!
+    }
+    point print_buttons to form_bar_buttons
+
+    new v12_form_bar_cfg
+    {
+        @"title": "Compatibilidad de partes"
+        @"buttons*": print_buttons
+        @"urlexit": "/"
+    }
+
+    _actions_btn_cls = "cursor:pointer; text-decoration:none; padding: 0px 8px; background-color:#F5F5F5; color:#000;"
+
+    new table_definition
+    {
+        @"datatable*": @("&.")
+        @"value_field":"sys_pk"
+        member @"columns"
+        {
+            member @"producto" { @"caption": "Producto" }
+            member @"modelo" { @"caption": "Modelo" }
+            member @"version" { @"caption": "Version" }
+            member @"anio" { @"caption": "Año" }
+            member @"_actions"
+            {
+                @"caption": "Acciones"
+                @"no-print": @true
+                @"template": ftext('
+                    <div class="no-print" style="display:flex;justify-content:center;align-items:center;gap:6px;">
+                        <a href="./${DataRow.sys_pk}/" style="#<_actions_btn_cls>">Editar</a>
+                        <a href="#" onclick="InduxsoftCrudlModel.Delete(${DataRow.sys_pk})" style="#<_actions_btn_cls>">Eliminar</a>
+                    </div>
+                ')
+            }
+        }
+    }
+
+    #$ div(class="container-fluid p-0" id="")
+    {
+        #! do uie.printV12FormBar(v12_form_bar_cfg)
+        #$ div(class="container-section mt-1 p-2 pt-0" id="work_area")
+        {
+            form(action="./" method="GET" id="form_filter" class="no-print mb-1")
+            {
+                div(class="py-1 w-100 d-flex gap-2 flex-wrap align-items-center")
+                {
+                    // div(class="d-flex gap-2"){$""}
+                    div(class="flex-grow-1")
+                    {
+                        #$"filter-text"(
+                            "id"="micontrol10"
+                            "text-field"="s"
+                            "placeholder"="Buscar... producto, modelo, version"
+                            "form"="#form_filter"
+                            "value"="#<@('$parameters/s')>"
+                            "auto-submit"="true"
+                            "class"="w-100"
+                        ){$""}
+                    }
+                }
+            }
+
+            #! do uie.dbeditable(table_definition,"tbl_partes")
+        }
+    }
+
+    #! do @context.end()
+}

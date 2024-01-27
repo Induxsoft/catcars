@@ -8,6 +8,8 @@ module "list.dk"
     #include "../config.dk"
 
     do @context.begin(@crud_context)
+    // ref _db:@("&database")
+    // ref _GET:@("&parameters")
 
     //#region DEFINICIÓN DE FILTROS SELECTS
     new fil_linea
@@ -15,15 +17,16 @@ module "list.dk"
         @"datatable*": ifnull(@("&./list_linea"),list.create())
         member "attributes"
         {
-            @"name": "linea"
+            @"name": "ilinea"
             @"class": "induxsoft-form-select"
-            // @"onchange": "document.querySelector('#form_filter').submit();"
+            @"title": "Filtrar por lineas"
+            @"onchange": "document.querySelector('#form_filter').submit();"
         }
-        @"value_field": ""
-        @"text_field": ""
-        @"first_value": "*"
-        @"first_text": "(All)"
-        @"selected": ""
+        @"value_field": "sys_pk"
+        @"text_field": "descripcion"
+        @"first_value": "0"
+        @"first_text": "(Todos)"
+        @"selected": @("#parameters/ilinea")
     }
     
     new fil_marca
@@ -31,15 +34,16 @@ module "list.dk"
         @"datatable*": ifnull(@("&./list_marca"),list.create())
         member "attributes"
         {
-            @"name": "marca"
+            @"name": "imarca"
             @"class": "induxsoft-form-select"
-            // @"onchange": "document.querySelector('#form_filter').submit();"
+            @"title": "Filtrar por marcas"
+            @"onchange": "document.querySelector('#form_filter').submit();"
         }
-        @"value_field": ""
-        @"text_field": ""
-        @"first_value": "*"
-        @"first_text": "(All)"
-        @"selected": ""
+        @"value_field": "sys_pk"
+        @"text_field": "descripcion"
+        @"first_value": "0"
+        @"first_text": "(Todos)"
+        @"selected": @("#parameters/imarca")
     }
 
     new fil_departamento
@@ -47,15 +51,16 @@ module "list.dk"
         @"datatable*": ifnull(@("&./list_departamento"),list.create())
         member "attributes"
         {
-            @"name": "departamento"
+            @"name": "idepartamento"
             @"class": "induxsoft-form-select"
-            // @"onchange": "document.querySelector('#form_filter').submit();"
+            @"title": "Filtrar por departamentos"
+            @"onchange": "document.querySelector('#form_filter').submit();"
         }
-        @"value_field": ""
-        @"text_field": ""
-        @"first_value": "*"
-        @"first_text": "(All)"
-        @"selected": ""
+        @"value_field": "sys_pk"
+        @"text_field": "descripcion"
+        @"first_value": "0"
+        @"first_text": "(Todos)"
+        @"selected": @("#parameters/idepartamento")
     }
 
     new fil_modelo
@@ -63,15 +68,16 @@ module "list.dk"
         @"datatable*": ifnull(@("&./list_modelo"),list.create())
         member "attributes"
         {
-            @"name": "modelo"
+            @"name": "imodelo"
             @"class": "induxsoft-form-select"
-            // @"onchange": "document.querySelector('#form_filter').submit();"
+            @"title": "Filtrar por modelos"
+            @"onchange": "document.querySelector('#form_filter').submit();"
         }
-        @"value_field": ""
-        @"text_field": ""
-        @"first_value": "*"
-        @"first_text": "(All)"
-        @"selected": ""
+        @"value_field": "sys_pk"
+        @"text_field": "descripcion"
+        @"first_value": "0"
+        @"first_text": "(Todos)"
+        @"selected": @("#parameters/imodelo")
     }
 
     new fil_version
@@ -79,15 +85,16 @@ module "list.dk"
         @"datatable*": ifnull(@("&./list_version"),list.create())
         member "attributes"
         {
-            @"name": "version"
+            @"name": "iversion"
             @"class": "induxsoft-form-select"
-            // @"onchange": "document.querySelector('#form_filter').submit();"
+            @"title": "Filtrar por versiones"
+            @"onchange": "document.querySelector('#form_filter').submit();"
         }
-        @"value_field": ""
-        @"text_field": ""
-        @"first_value": "*"
-        @"first_text": "(All)"
-        @"selected": ""
+        @"value_field": "sys_pk"
+        @"text_field": "descripcion"
+        @"first_value": "0"
+        @"first_text": "(Todos)"
+        @"selected": @("#parameters/iversion")
     }
     //#endregion
 
@@ -114,7 +121,7 @@ module "list.dk"
 
     new table_definition
     {
-        @"datatable*": @("&.")
+        @"datatable*": ifnull(@("&./list"),list.create())
         @"value_field":"sys_pk"
         member @"columns"
         {

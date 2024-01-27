@@ -111,6 +111,21 @@ module ""
 
     car.list::&db,&params
     {
+        new data
+        {
+            @"list_linea*": dbr.list(db,"select sys_pk, descripcion from linea",@null)
+            @"list_marca*": dbr.list(db,"select sys_pk, descripcion from marca",@null)
+            @"list_departamento*": dbr.list(db,"select sys_pk, descripcion from departamento",@null)
+            @"list_modelo*": dbr.list(db,"select sys_pk, descripcion from car_modelo",@null)
+            @"list_version*": dbr.list(db,"select sys_pk, descripcion from car_version",@null)
+        }
+
+        if @@(params,"#ilinea") > 0 { @list_query = @list_query + " AND ln.sys_pk = @ilinea" }
+        if @@(params,"#imarca") > 0 { @list_query = @list_query + " AND mc.sys_pk = @imarca" }
+        if @@(params,"#idepartamento") > 0 { @list_query = @list_query + " AND dp.sys_pk = @idepartamento" }
+        if @@(params,"#imodelo") > 0 { @list_query = @list_query + " AND m.sys_pk = @imodelo" }
+        if @@(params,"#iversion") > 0 { @list_query = @list_query + " AND v.sys_pk = @iversion" }
+
         if trim(@@(params,"$s")) != "" 
         {
             @list_query = @list_query + " AND (
@@ -119,9 +134,11 @@ module ""
                 OR v.descripcion LIKE CONCAT('%',@s,'%')
             )"
         }
+
+        data<"list*"> : entity.list(db,params)
         
         // do rise_error(0,@list_query)
-        return entity.list(db,params)
+        return data
     }
 
     car.read::&db,&params

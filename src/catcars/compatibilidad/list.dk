@@ -15,12 +15,13 @@ module "list.dk"
     new fil_linea
     {
         @"datatable*": ifnull(@("&./list_linea"),list.create())
+        @"id": "fil_linea"
         member "attributes"
         {
             @"name": "ilinea"
             @"class": "induxsoft-form-select"
             @"title": "Filtrar por lineas"
-            @"onchange": "document.querySelector('#form_filter').submit();"
+            @"disabled": ""
         }
         @"value_field": "sys_pk"
         @"text_field": "descripcion"
@@ -32,12 +33,13 @@ module "list.dk"
     new fil_marca
     {
         @"datatable*": ifnull(@("&./list_marca"),list.create())
+        @"id": "fil_marca"
         member "attributes"
         {
             @"name": "imarca"
             @"class": "induxsoft-form-select"
             @"title": "Filtrar por marcas"
-            @"onchange": "document.querySelector('#form_filter').submit();"
+            @"disabled": ""
         }
         @"value_field": "sys_pk"
         @"text_field": "descripcion"
@@ -49,52 +51,69 @@ module "list.dk"
     new fil_departamento
     {
         @"datatable*": ifnull(@("&./list_departamento"),list.create())
+        @"id": "fil_departamento"
         member "attributes"
         {
-            @"name": "idepartamento"
+            @"name": "idepto"
             @"class": "induxsoft-form-select"
             @"title": "Filtrar por departamentos"
-            @"onchange": "document.querySelector('#form_filter').submit();"
+            @"disabled": ""
         }
         @"value_field": "sys_pk"
         @"text_field": "descripcion"
         @"first_value": "0"
         @"first_text": "(Todos)"
-        @"selected": @("#parameters/idepartamento")
+        @"selected": @("#parameters/idepto")
     }
 
-    new fil_modelo
+    new fil_car_marca
     {
-        @"datatable*": ifnull(@("&./list_modelo"),list.create())
+        @"datatable*": ifnull(@("&./list_car_marca"),list.create())
+        @"id": "fil_car_marca"
         member "attributes"
         {
-            @"name": "imodelo"
+            @"name": "car_marca"
             @"class": "induxsoft-form-select"
             @"title": "Filtrar por modelos"
-            @"onchange": "document.querySelector('#form_filter').submit();"
+            @"disabled": ""
         }
         @"value_field": "sys_pk"
         @"text_field": "descripcion"
         @"first_value": "0"
         @"first_text": "(Todos)"
-        @"selected": @("#parameters/imodelo")
+        @"selected": @("#parameters/car_marca")
     }
 
-    new fil_version
+    new fil_car_modelo
     {
-        @"datatable*": ifnull(@("&./list_version"),list.create())
+        @"datatable*": list.create()
+        @"id": "fil_car_modelo"
         member "attributes"
         {
-            @"name": "iversion"
+            @"name": "car_modelo"
             @"class": "induxsoft-form-select"
-            @"title": "Filtrar por versiones"
-            @"onchange": "document.querySelector('#form_filter').submit();"
+            @"title": "Filtrar por modelos"
+            @"disabled": ""
         }
-        @"value_field": "sys_pk"
-        @"text_field": "descripcion"
         @"first_value": "0"
         @"first_text": "(Todos)"
-        @"selected": @("#parameters/iversion")
+        @"selected": @("#parameters/car_modelo")
+    }
+
+    new fil_car_version
+    {
+        @"datatable*": list.create()
+        @"id": "fil_car_version"
+        member "attributes"
+        {
+            @"name": "car_version"
+            @"class": "induxsoft-form-select"
+            @"title": "Filtrar por versiones"
+            @"disabled": ""
+        }
+        @"first_value": "0"
+        @"first_text": "(Todos)"
+        @"selected": @("#parameters/car_version")
     }
     //#endregion
 
@@ -130,9 +149,10 @@ module "list.dk"
             member @"unidad" { @"caption": "Unidad" }
             member @"linea" { @"caption": "Linea" }
             member @"marca" { @"caption": "Marca" }
-            member @"modelo" { @"caption": "Modelo" }
-            member @"version" { @"caption": "Versión" }
-            member @"anio" { @"caption": "Año" }
+            member @"car_marca" { @"caption": "Marca vehículo" }
+            member @"car_modelo" { @"caption": "Modelo vehículo" }
+            member @"car_version" { @"caption": "Versión vehículo" }
+            
             member @"_actions"
             {
                 @"caption": "Acciones"
@@ -158,30 +178,46 @@ module "list.dk"
                 {
                     div(class="d-flex gap-2")
                     {
-                        ##
-                        do uie.dbSelect(fil_linea)
-                        do uie.dbSelect(fil_marca)
-                        do uie.dbSelect(fil_departamento)
-                        do uie.dbSelect(fil_modelo)
-                        do uie.dbSelect(fil_version)
-                        ##
+                        div{ #! do uie.dbSelect(fil_linea) } #$
+                        div{ #! do uie.dbSelect(fil_marca) } #$
+                        div{ #! do uie.dbSelect(fil_departamento) } #$
+                        div{ #! do uie.dbSelect(fil_car_marca) } #$
+                        div{ #! do uie.dbSelect(fil_car_modelo) } #$
+                        div{ #! do uie.dbSelect(fil_car_version) } #$
+
+                        button(class="btn btn-link border-primary rounded-0" type="button" id="btn_aplicar_filtros"){$"Modificar"}
+                        button(class="btn btn-link border-primary rounded-0 d-none" type="reset" id="btn_reset_filters"){$"Cancelar"}
                     }
-                    div(class="flex-grow-1")
-                    {
-                        #$"filter-text"(
-                            "id"="micontrol10"
-                            "text-field"="s"
-                            "placeholder"="Buscar... producto, modelo, version"
-                            "form"="#form_filter"
-                            "value"="#<@('$parameters/s')>"
-                            "auto-submit"="true"
-                            "class"="w-100"
-                        ){$""}
-                    }
+                }
+                div(class="")
+                {
+                    #$"filter-text"(
+                        "id"="micontrol10"
+                        "text-field"="text"
+                        "placeholder"="Producto, [marca, modelo, version] del vehículo"
+                        "form"="#form_filter"
+                        "value"="#<@('$parameters/text')>"
+                        "auto-submit"="true"
+                        "class"="w-100"
+                    ){$""}
                 }
             }
 
-            #! do uie.dbeditable(table_definition,"tbl_partes")
+            #! do uie.dbeditable(table_definition,"tbl_car_compatible")
+        } #$
+
+        div
+        {
+            script(src="#<@JS_COMPATIBILIDAD>"){$""}
+            script(type="text/javascript")
+            {$'
+                document.addEventListener("DOMContentLoaded", () => {
+                    compatibilidad.list._GET = #<to.json(@("&parameters"))> ?? {};
+                    compatibilidad.list.url_buscar_car_modelo = "#<@URL_SEARCH_MODELO>";
+                    compatibilidad.list.url_buscar_car_version = "#<@URL_SEARCH_VERSION>";
+                    compatibilidad.list.init();
+                });
+            '}
         }
     }
 

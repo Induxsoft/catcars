@@ -9,19 +9,21 @@ module ""
         p.codigo AS cproducto,
         p.descripcion AS `producto`,
         p.unidad,
-        ln.descripcion AS `linea`,
-        IFNULL(mc.descripcion,'') AS `marca`,
-        IFNULL(dp.descripcion,'') AS `departamento`,
-        m.descripcion AS `modelo`,
-        IFNULL(v.descripcion,'') AS `version`,
+        pl.descripcion AS `linea`,
+        IFNULL(pm.descripcion,'') AS `marca`,
+        IFNULL(pd.descripcion,'') AS `departamento`,
+        cmc.descripcion AS `car_marca`,
+        cm.descripcion AS `car_modelo`,
+        IFNULL(cv.descripcion,'') AS `car_version`,
         c.ano AS anio
     FROM #<@table_name> AS c
         INNER JOIN producto AS p ON c.ref_producto = p.sys_pk
-            INNER JOIN linea AS ln ON p.ilinea = ln.sys_pk
-            LEFT JOIN marca AS mc ON p.imarca = mc.sys_pk
-            LEFT JOIN departamento AS dp ON p.idepartamento = dp.sys_pk
-        INNER JOIN car_modelo AS m ON c.ref_modelo = m.sys_pk
-        LEFT JOIN car_version AS v ON c.ref_version = v.sys_pk
+            INNER JOIN linea AS pl ON p.ilinea = pl.sys_pk
+            LEFT JOIN marca AS pm ON p.imarca = pm.sys_pk
+            LEFT JOIN departamento AS pd ON p.idepartamento = pd.sys_pk
+        INNER JOIN car_modelo AS cm ON c.ref_modelo = cm.sys_pk
+            INNER JOIN car_marca AS cmc ON cm.ref_car_marca = cmc.sys_pk
+        LEFT JOIN car_version AS cv ON c.ref_version = cv.sys_pk
     WHERE NOT IFNULL(c.sys_deleted,0)
     "
     @read_query = "
@@ -53,13 +55,53 @@ module ""
         return list.create()
     }
 
-    car.buscarModelo::&db,&params
+    car.buscarMarca::&db,&params
     {
-        sql = "SELECT sys_pk, codigo, descripcion FROM car_modelo WHERE #<condition>"
+        sql = "SELECT sys_pk, codigo, descripcion FROM car_marca WHERE #<condition> ORDER BY sys_pk ASC;"
         
         if trim(@@(params,"$id")) != "" {
             condition = "(sys_pk = @id OR sys_guid = @id)"
             return dbr.rec(db,ftext(sql),params)
+        }
+        if trim(@@(params,"$search")) != "" {
+            condition = "(codigo LIKE CONCAT('%',@search,'%') OR descripcion LIKE CONCAT('%',@search,'%'))"
+            return dbr.list(db,ftext(sql),params)
+        }
+
+        return list.create()
+    }
+
+    car.buscarModelo::&db,&params
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM car_modelo WHERE #<condition> ORDER BY sys_pk ASC;"
+        
+        if trim(@@(params,"$id")) != "" {
+            condition = "(sys_pk = @id OR sys_guid = @id)"
+            return dbr.rec(db,ftext(sql),params)
+        }
+        if @@(params,"#imarca") > 0 {
+            condition = "ref_car_marca = @imarca"
+            return dbr.list(db,ftext(sql),params)
+        }
+        if trim(@@(params,"$search")) != "" {
+            condition = "(codigo LIKE CONCAT('%',@search,'%') OR descripcion LIKE CONCAT('%',@search,'%'))"
+            return dbr.list(db,ftext(sql),params)
+        }
+
+        return list.create()
+    }
+
+    car.buscarVersion::&db,&params
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM car_version WHERE #<condition> ORDER BY sys_pk ASC;"
+        
+        if trim(@@(params,"$id")) != "" {
+            condition = "(sys_pk = @id OR sys_guid = @id)"
+            return dbr.rec(db,ftext(sql),params)
+        }
+        if @@(params,"#imodelo") > 0 {
+            condition = "ref_car_modelo = @imodelo"
+            return dbr.list(db,ftext(sql),params)
         }
         if trim(@@(params,"$search")) != "" {
             condition = "(codigo LIKE CONCAT('%',@search,'%') OR descripcion LIKE CONCAT('%',@search,'%'))"
@@ -116,22 +158,25 @@ module ""
             @"list_linea*": dbr.list(db,"select sys_pk, descripcion from linea",@null)
             @"list_marca*": dbr.list(db,"select sys_pk, descripcion from marca",@null)
             @"list_departamento*": dbr.list(db,"select sys_pk, descripcion from departamento",@null)
-            @"list_modelo*": dbr.list(db,"select sys_pk, descripcion from car_modelo",@null)
-            @"list_version*": dbr.list(db,"select sys_pk, descripcion from car_version",@null)
+            @"list_car_marca*": dbr.list(db,"select sys_pk, descripcion from car_marca",@null)
+            // @"list_car_modelo*": dbr.list(db,"select sys_pk, descripcion from car_modelo",@null)
+            // @"list_car_version*": dbr.list(db,"select sys_pk, descripcion from car_version",@null)
         }
 
-        if @@(params,"#ilinea") > 0 { @list_query = @list_query + " AND ln.sys_pk = @ilinea" }
-        if @@(params,"#imarca") > 0 { @list_query = @list_query + " AND mc.sys_pk = @imarca" }
-        if @@(params,"#idepartamento") > 0 { @list_query = @list_query + " AND dp.sys_pk = @idepartamento" }
-        if @@(params,"#imodelo") > 0 { @list_query = @list_query + " AND m.sys_pk = @imodelo" }
-        if @@(params,"#iversion") > 0 { @list_query = @list_query + " AND v.sys_pk = @iversion" }
+        if @@(params,"#ilinea") > 0 { @list_query = @list_query + " AND pl.sys_pk = @ilinea" }
+        if @@(params,"#imarca") > 0 { @list_query = @list_query + " AND pm.sys_pk = @imarca" }
+        if @@(params,"#idepto") > 0 { @list_query = @list_query + " AND pd.sys_pk = @idepto" }
+        if @@(params,"#car_marca") > 0 { @list_query = @list_query + " AND cmc.sys_pk = @car_marca" }
+        if @@(params,"#car_modelo") > 0 { @list_query = @list_query + " AND cm.sys_pk = @car_modelo" }
+        if @@(params,"#car_version") > 0 { @list_query = @list_query + " AND cv.sys_pk = @car_version" }
 
-        if trim(@@(params,"$s")) != "" 
+        if trim(@@(params,"$text")) != "" 
         {
             @list_query = @list_query + " AND (
-                p.descripcion LIKE CONCAT('%',@s,'%')
-                OR m.descripcion LIKE CONCAT('%',@s,'%')
-                OR v.descripcion LIKE CONCAT('%',@s,'%')
+                p.descripcion LIKE CONCAT('%',@text,'%')
+                OR cmc.descripcion LIKE CONCAT('%',@text,'%')
+                OR cm.descripcion LIKE CONCAT('%',@text,'%')
+                OR cv.descripcion LIKE CONCAT('%',@text,'%')
             )"
         }
 

@@ -5,7 +5,12 @@ module "config"
     // =============== GENERAL
 
     @URL_SEARCH_PRODUCTO = "/!/catcars/compatibilidad/?_view=buscar-producto&search=@search"
+    @URL_SEARCH_MARCA = "/!/catcars/compatibilidad/?_view=buscar-marca&search=@search"
     @URL_SEARCH_MODELO = "/!/catcars/compatibilidad/?_view=buscar-modelo&search=@search"
+    @URL_SEARCH_VERSION = "/!/catcars/compatibilidad/?_view=buscar-version&search=@search"
+
+    // _STATIC
+    @JS_COMPATIBILIDAD = "/$/catcars/js/compatibilidad.js"
 
     // _PACKAGE
     @CATCARS_MARCA = "/!/catcars/marca/"

@@ -9,9 +9,19 @@ module ""
             point @list to car.buscarProducto
             break
         }
+        case "buscar-marca"
+        {
+            point @list to car.buscarMarca
+            break
+        }
         case "buscar-modelo"
         {
             point @list to car.buscarModelo
+            break
+        }
+        case "buscar-version"
+        {
+            point @list to car.buscarVersion
             break
         }
         default

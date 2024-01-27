@@ -1,5 +1,5 @@
 #include "ddm.dkh"
-model "name"
+model ""
 {
     #include "induxsoft.abstracts.ddm"
     
@@ -8,6 +8,12 @@ model "name"
     entity "ctipoproducto" : "EnumModel" {}
     entity "cmetodosvaluacion" : "EnumModel" {}
 
+    entity "departamento" : "TableModel"
+    {
+        @"codigo" string(5) unique required
+        @"descripcion" string(50) unique required
+    }
+    
     entity "divisa" : "TableModel"
     {
         @"codigo" string(5) unique required
@@ -19,6 +25,12 @@ model "name"
     {
         @"clase" ref:"cclaseproducto" required
         @"codigo" string(15) unique required
+        @"descripcion" string(50) unique required
+    }
+
+    entity "marca" : "TableModel"
+    {
+        @"codigo" string(5) unique required
         @"descripcion" string(50) unique required
     }
 
@@ -37,8 +49,10 @@ model "name"
         @"reqlote" bool required
         @"reqserie" bool required
         @"unidad" string(10) required
+        @"idepartamento" ref:"departamento"
         @"idivisa" ref:"divisa" required
         @"ilinea" ref:"linea" required
+        @"imarca" ref:"marca"
         @"impuestos" ref:"cfgimpuesto" required
         @"uf_sat_proser" string(50) required
         @"uf_sat_uniproser" string(50) required

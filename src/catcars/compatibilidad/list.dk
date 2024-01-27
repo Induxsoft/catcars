@@ -9,6 +9,88 @@ module "list.dk"
 
     do @context.begin(@crud_context)
 
+    //#region DEFINICIÓN DE FILTROS SELECTS
+    new fil_linea
+    {
+        @"datatable*": ifnull(@("&./list_linea"),list.create())
+        member "attributes"
+        {
+            @"name": "linea"
+            @"class": "induxsoft-form-select"
+            // @"onchange": "document.querySelector('#form_filter').submit();"
+        }
+        @"value_field": ""
+        @"text_field": ""
+        @"first_value": "*"
+        @"first_text": "(All)"
+        @"selected": ""
+    }
+    
+    new fil_marca
+    {
+        @"datatable*": ifnull(@("&./list_marca"),list.create())
+        member "attributes"
+        {
+            @"name": "marca"
+            @"class": "induxsoft-form-select"
+            // @"onchange": "document.querySelector('#form_filter').submit();"
+        }
+        @"value_field": ""
+        @"text_field": ""
+        @"first_value": "*"
+        @"first_text": "(All)"
+        @"selected": ""
+    }
+
+    new fil_departamento
+    {
+        @"datatable*": ifnull(@("&./list_departamento"),list.create())
+        member "attributes"
+        {
+            @"name": "departamento"
+            @"class": "induxsoft-form-select"
+            // @"onchange": "document.querySelector('#form_filter').submit();"
+        }
+        @"value_field": ""
+        @"text_field": ""
+        @"first_value": "*"
+        @"first_text": "(All)"
+        @"selected": ""
+    }
+
+    new fil_modelo
+    {
+        @"datatable*": ifnull(@("&./list_modelo"),list.create())
+        member "attributes"
+        {
+            @"name": "modelo"
+            @"class": "induxsoft-form-select"
+            // @"onchange": "document.querySelector('#form_filter').submit();"
+        }
+        @"value_field": ""
+        @"text_field": ""
+        @"first_value": "*"
+        @"first_text": "(All)"
+        @"selected": ""
+    }
+
+    new fil_version
+    {
+        @"datatable*": ifnull(@("&./list_version"),list.create())
+        member "attributes"
+        {
+            @"name": "version"
+            @"class": "induxsoft-form-select"
+            // @"onchange": "document.querySelector('#form_filter').submit();"
+        }
+        @"value_field": ""
+        @"text_field": ""
+        @"first_value": "*"
+        @"first_text": "(All)"
+        @"selected": ""
+    }
+    //#endregion
+
     form_bar_buttons::
     {
         _btn_cls = "btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"
@@ -36,9 +118,13 @@ module "list.dk"
         @"value_field":"sys_pk"
         member @"columns"
         {
+            member @"cproducto" { @"caption": "Código" }
             member @"producto" { @"caption": "Producto" }
+            member @"unidad" { @"caption": "Unidad" }
+            member @"linea" { @"caption": "Linea" }
+            member @"marca" { @"caption": "Marca" }
             member @"modelo" { @"caption": "Modelo" }
-            member @"version" { @"caption": "Version" }
+            member @"version" { @"caption": "Versión" }
             member @"anio" { @"caption": "Año" }
             member @"_actions"
             {
@@ -63,7 +149,16 @@ module "list.dk"
             {
                 div(class="py-1 w-100 d-flex gap-2 flex-wrap align-items-center")
                 {
-                    // div(class="d-flex gap-2"){$""}
+                    div(class="d-flex gap-2")
+                    {
+                        ##
+                        do uie.dbSelect(fil_linea)
+                        do uie.dbSelect(fil_marca)
+                        do uie.dbSelect(fil_departamento)
+                        do uie.dbSelect(fil_modelo)
+                        do uie.dbSelect(fil_version)
+                        ##
+                    }
                     div(class="flex-grow-1")
                     {
                         #$"filter-text"(

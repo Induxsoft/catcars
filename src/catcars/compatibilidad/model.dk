@@ -6,12 +6,20 @@ module ""
     @list_query = "
     SELECT
         c.sys_pk,
+        p.codigo AS cproducto,
         p.descripcion AS `producto`,
+        p.unidad,
+        ln.descripcion AS `linea`,
+        IFNULL(mc.descripcion,'') AS `marca`,
+        IFNULL(dp.descripcion,'') AS `departamento`,
         m.descripcion AS `modelo`,
         IFNULL(v.descripcion,'') AS `version`,
         c.ano AS anio
     FROM #<@table_name> AS c
         INNER JOIN producto AS p ON c.ref_producto = p.sys_pk
+            INNER JOIN linea AS ln ON p.ilinea = ln.sys_pk
+            LEFT JOIN marca AS mc ON p.imarca = mc.sys_pk
+            LEFT JOIN departamento AS dp ON p.idepartamento = dp.sys_pk
         INNER JOIN car_modelo AS m ON c.ref_modelo = m.sys_pk
         LEFT JOIN car_version AS v ON c.ref_version = v.sys_pk
     WHERE NOT IFNULL(c.sys_deleted,0)

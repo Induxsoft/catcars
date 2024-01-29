@@ -34,7 +34,7 @@ module "form.dk"
             @"data-year": "#<@@(row,'ano')>"
         }
         @"first_value": "0"
-        @"first_text": "Seleccione la version"
+        @"first_text": "Todas las versiones"
         @"selected": form("ref_version","nm",entity)
     }
 
@@ -113,12 +113,14 @@ module "form.dk"
             {$'
                 document.addEventListener("DOMContentLoaded", () => {
                     let sel_version = document.getElementById("sel_version");
+                    let txt_anio = document.getElementById("txt_anio");
 
                     sel_version.addEventListener("change", (event) => {
+                        (Number(event.target.value) > 0) ? txt_anio.setAttribute("readonly","true") : txt_anio.removeAttribute("readonly");
                         let option = sel_version.options[sel_version.selectedIndex];
                         let year_version = Number(option.getAttribute("data-year"));
 
-                        document.getElementById("txt_anio").value = year_version;
+                        txt_anio.value = year_version;
                     });
                 });
             '}

@@ -20,6 +20,13 @@ module ""
        do prepareView(db,params,entity)
        return entity
     }
-    
+    read::&db,&params
+    {
+        ref entity = entity.read(db,params)
+        do prepareView(db,params,entity)
+        return entity
+    }
+
     point @blank to blank
+    point @read to read
 }

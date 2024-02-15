@@ -73,18 +73,24 @@ module ""
 
     car.buscarModelo::&db,&params
     {
-        sql = "SELECT sys_pk, codigo, descripcion FROM car_modelo WHERE #<condition> ORDER BY sys_pk ASC;"
+        sql = "
+            SELECT m.sys_pk, m.codigo, m.descripcion, CONCAT(m2.descripcion,' - ', m.descripcion) descripcion2
+            FROM car_modelo m
+                INNER JOIN car_marca m2 ON m.ref_car_marca = m2.sys_pk
+            WHERE #<condition> 
+            ORDER BY sys_pk ASC;
+        "
         
         if trim(@@(params,"$id")) != "" {
-            condition = "(sys_pk = @id OR sys_guid = @id)"
+            condition = "(m.sys_pk = @id OR m.sys_guid = @id)"
             return dbr.rec(db,ftext(sql),params)
         }
         if @@(params,"#imarca") > 0 {
-            condition = "ref_car_marca = @imarca"
+            condition = "m.ref_car_marca = @imarca"
             return dbr.list(db,ftext(sql),params)
         }
         if trim(@@(params,"$search")) != "" {
-            condition = "(codigo LIKE CONCAT('%',@search,'%') OR descripcion LIKE CONCAT('%',@search,'%'))"
+            condition = "(m.codigo LIKE CONCAT('%',@search,'%') OR m.descripcion LIKE CONCAT('%',@search,'%'))"
             return dbr.list(db,ftext(sql),params)
         }
 
@@ -131,7 +137,7 @@ module ""
         {
             case ""
             {
-                sql_versions = "SELECT sys_pk, codigo, descripcion, ano FROM car_version WHERE NOT IFNULL(sys_deleted,0)"
+                sql_versions = "SELECT sys_pk, codigo, descripcion, CONCAT(descripcion,' - ', ano) descripcion2, ano, ref_car_modelo FROM car_version WHERE NOT IFNULL(sys_deleted,0)"
 
                 if not(isNew) || field.exist(data,"form")
                 {

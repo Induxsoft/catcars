@@ -16,7 +16,6 @@ module "form.dk"
     ref listVersion = ifnull(@("&./list_version"),list.create())
 
     @_entity_id = @("$parameters/_entity_id")
-    // do rise_error(0,to.json(@("&.")))
 
     new sel_version
     {
@@ -28,7 +27,7 @@ module "form.dk"
             @"name": "ref_version"
         }
         @"value_field": "sys_pk"
-        @"text_field": "descripcion"
+        @"text_field": "descripcion2"
         new member "attr_options"
         {
             @"data-year": "#<@@(row,'ano')>"
@@ -39,6 +38,8 @@ module "form.dk"
     }
 
     isNew = (@_entity_id == "_new")
+
+    if isNew { sel_version<"datatable*">: list.create() }
 
     #$ div(class="container p-0")
     {
@@ -81,10 +82,10 @@ module "form.dk"
                     div(class="col-12")
                     {
                         label(class="form-label fw-bold"){$"Modelo:"}
-                        "input-key"(id="ik_modelo" name="ref_modelo" "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion"
+                        "input-key"(id="ik_modelo" name="ref_modelo" "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion2"
                             "data-value"="#<to.json(modelo)>" "data-source"="#<@URL_SEARCH_MODELO>"
-                            columns="codigo,descripcion"
-                            colcaptions="Código,Descripcion"
+                            columns="codigo,descripcion2"
+                            colcaptions="Código,Descripción"
                             "box-title-text"="Seleccione un registro"
                             "box-placeholder-text"="Buscar modelos"
                             "box-nodata-text"="No se encontraron registros para mostrar"
@@ -93,7 +94,7 @@ module "form.dk"
                     }
                     div(class="col-lg-8 col-md-8 col-sm-8")
                     {
-                        label(class="form-label"){"Version:"}
+                        label(class="form-label"){"Versión:"}
                         ##
                         do uie.dbSelect(sel_version)
                         ##
@@ -114,6 +115,8 @@ module "form.dk"
                 document.addEventListener("DOMContentLoaded", () => {
                     let sel_version = document.getElementById("sel_version");
                     let txt_anio = document.getElementById("txt_anio");
+                    let ik_modelo = document.getElementById("ik_modelo");
+                    let listVersion = #<to.json(listVersion)>;
 
                     sel_version.addEventListener("change", (event) => {
                         (Number(event.target.value) > 0) ? txt_anio.setAttribute("readonly","true") : txt_anio.removeAttribute("readonly");
@@ -122,6 +125,23 @@ module "form.dk"
 
                         txt_anio.value = year_version;
                     });
+                    if (ik_modelo) ik_modelo.addEventListener("change", value => {
+                        let versions_model = listVersion.filter(v => v.ref_car_modelo == value.sys_pk);
+                        fill_version_select(versions_model);
+                    });
+                    function fill_version_select(versiones)
+                    {
+                        let tmp = ``;
+                        versiones.forEach((v,i) => {
+                            tmp+=`<option value="${v.sys_pk}" data-year="${v.ano}">${v.descripcion2}</option>`;
+                        });
+                        sel_version.innerHTML = tmp;
+                        if (tmp.trim() != "")
+                        {
+                            let e = new Event("change");
+                            sel_version.dispatchEvent(e);
+                        }
+                    }
                 });
             '}
         }

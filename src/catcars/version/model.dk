@@ -4,10 +4,18 @@ module ""
 {
     @table_name="car_version"
     like=" and if(ifnull(@s,'')='',true,concat_ws('',v.codigo,v.descripcion,v.ano,m.codigo,m.descripcion,cm.codigo,cm.descripcion) like concat('%',@s,'%')  )"
+    
     @list_query="select v.*,cm.codigo codmarca,cm.descripcion descmarca,m.codigo codmodelo,m.descripcion descmodelo
     from #<@table_name> v inner join car_modelo m on v.ref_car_modelo=m.sys_pk
     inner join car_marca cm on m.ref_car_marca=cm.sys_pk
     where ifnull(v.sys_deleted,0)=0  "+like
+    
+    @read_query="
+        SELECT v.*, m.ref_car_marca
+        FROM #<@table_name> v 
+            INNER JOIN car_modelo m ON v.ref_car_modelo=m.sys_pk
+        WHERE v.#<@keyfield> = @_entity_id;
+    "
     
     prepareView::&db,&params,&rec
     {

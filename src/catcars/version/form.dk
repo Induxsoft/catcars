@@ -62,7 +62,7 @@ module "form.dk"
                 {
                     div(class="col-md-4")
                     {
-                        small{$"Marca:"}
+                        small(class="fw-bold"){$"Marca:"}
                         select(class="induxsoft-form-select" id="marca" required="true")
                         {$""
                             #! for i = 0; i < @count(@("&./marcas"))

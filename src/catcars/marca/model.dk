@@ -5,4 +5,41 @@ module ""
     @table_name="car_marca"
     like=" and if(ifnull(@s,'')='',true,concat_ws('',codigo,descripcion,url) like concat('%',@s,'%')  )"
     @list_query="select * from #<@table_name> where ifnull(sys_deleted,0)=0 "+ like
+
+    function list(&db, &params)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.list(db, params)
+    }
+    function read(&db, &params)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_MARCA_VEHICULO_READONLY)) { do rise_error(500,"No autorizado") }
+
+        return entity.read(db, params)
+    }
+    function create(&db, &params, &data)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_CREATE_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.create(db, params)
+    }
+    function update(&db, &params, &data)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.update(db, params)
+    }
+    function delete(&db, &params)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_DELETE_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.delete(db, params)
+    }
+
+    point @list to list
+    point @read to read
+    point @create to create
+    point @update to update
+    point @delete to delete
 }

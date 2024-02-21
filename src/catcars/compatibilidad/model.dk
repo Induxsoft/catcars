@@ -159,6 +159,8 @@ module ""
 
     car.list::&db,&params
     {
+        if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+
         new data
         {
             @"list_linea*": dbr.list(db,"select sys_pk, descripcion from linea",@null)
@@ -194,6 +196,8 @@ module ""
 
     car.read::&db,&params
     {
+        if not(dbr.security.isauth(db,@CAT_AUT_COMPATIBILIDAD_PARTES_READONLY)) { do rise_error(500,"No autorizado") }
+
         new data
         {
             @"entity*": entity.read(db,params)
@@ -231,6 +235,8 @@ module ""
 
     car.create::&db,&params,&data
     {
+        if not(dbr.security.isauth(db,@CAT_AUT_CREATE_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+
         do errordet(@false)
         ref car_compatible = car.vData(db,params,data)
         do entity.create(db,params,car_compatible)
@@ -253,6 +259,8 @@ module ""
 
     car.update::&db,&params,&data
     {
+        if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+
         do errordet(@false)
         ref car_compatible = car.vData(db,params,data)
         do entity.update(db,params,car_compatible)
@@ -272,4 +280,11 @@ module ""
             do rise_error(code,error)
         }
     }
+
+    function car.delete(&db, &params)
+	{
+        if not(dbr.security.isauth(db,@CAT_AUT_DELETE_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+
+        return entity.delete(db, params)
+	}
 }

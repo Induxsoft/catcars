@@ -34,7 +34,28 @@ program "instalador"
     // Archivos de datos iniciales (Orden de instalación)
     ref files_to_import = from.json('[]')
 	// Lista de permisos iniciales
-    ref permissions_to_import = from.json('[]')
+    ref permissions_to_import = from.json('[
+        "CVC-00-00-000",
+        "CVC-00-00-001",
+        "CVC-00-00-002",
+        "CVC-00-00-003",
+        "CVC-00-00-004",
+        "CVM-00-00-000",
+        "CVM-00-00-001",
+        "CVM-00-00-002",
+        "CVM-00-00-003",
+        "CVM-00-00-004",
+        "CDM-00-00-000",
+        "CDM-00-00-001",
+        "CDM-00-00-002",
+        "CDM-00-00-003",
+        "CDM-00-00-004",
+        "CVV-00-00-000",
+        "CVV-00-00-001",
+        "CVV-00-00-002",
+        "CVV-00-00-003",
+        "CVV-00-00-004"
+    ]')
 
     // DECLARACIÓN DE FUNCIONES
     ref lib_csv = _import_library("devkron.serialize.csv.dll")

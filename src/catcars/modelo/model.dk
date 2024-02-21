@@ -21,12 +21,42 @@ module ""
     }
     read::&db,&params
     {
+        if not(dbr.security.isauth(db,@CAT_AUT_MODELO_VEHICULO_READONLY)) { do rise_error(500,"No autorizado") }
+
         ref entity=entity.read(db,params)
         do prepareView(db,params,entity)
         return entity
     }
     
+    function list(&db, &params)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.list(db, params)
+    }
+    function create(&db, &params, &data)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_CREATE_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.create(db, params)
+    }
+    function update(&db, &params, &data)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.update(db, params)
+    }
+    function delete(&db, &params)
+    {
+        if not(dbr.security.isauth(db,@CAT_AUT_DELETE_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+
+        return entity.delete(db, params)
+    }
+
     point @read to read
-    
+    point @list to list
     point @blank to blank
+    point @create to create
+    point @update to update
+    point @delete to delete
 }

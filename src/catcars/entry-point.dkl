@@ -7,6 +7,8 @@ module "Controller configs"
 	#include "dbr.dkh"
 	#include "config.dk"
 	#include "crudl/crudl.dk"
+	#include "dbr.vars.dkl"
+	#include "dbr.security.dkl"
 
 	if @@(@http_context,"$session/user/ids") == "" 
 	{

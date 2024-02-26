@@ -6,30 +6,48 @@ module ""
     like=" and if(ifnull(@s,'')='',true,concat_ws('',codigo,descripcion,url) like concat('%',@s,'%')  )"
     @list_query="select * from #<@table_name> where ifnull(sys_deleted,0)=0 "+ like
 
+    function check_autocode(&db,table,field,&data)
+    {
+        varvalue = dbr.vars.getd(db,"FXCA120","|0000")
+        ref config = dbr.autocode.info(varvalue)
+        new_code = dbr.autocode.new(db,table,field,config)
+
+        data<"codigo">: new_code
+
+        exception
+        { }
+    }
+
     function list(&db, &params)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
 
         return entity.list(db, params)
     }
+
     function read(&db, &params)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_MARCA_VEHICULO_READONLY)) { do rise_error(500,"No autorizado") }
 
         return entity.read(db, params)
     }
+
     function create(&db, &params, &data)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_CREATE_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
 
-        return entity.create(db, params)
+        if @@(data,"codigo")=="" { do check_autocode(db,"car_marca","codigo",data) }
+
+        return entity.create(db, params, data)
     }
+
     function update(&db, &params, &data)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }
 
-        return entity.update(db, params)
+        return entity.update(db, params, data)
     }
+
     function delete(&db, &params)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_DELETE_MARCA_VEHICULO)) { do rise_error(500,"No autorizado") }

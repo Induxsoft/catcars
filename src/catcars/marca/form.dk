@@ -50,7 +50,7 @@ module "form.dk"
                     div(class="col-sm-4")
                     {
                         small(class="fw-bold"){$"Código:"}
-                        input(type="text" class="induxsoft-form-control mb-2" name="codigo" value="#<@@(data, '$codigo')>" required="true" maxlength="15")
+                        input(type="text" class="induxsoft-form-control mb-2" name="codigo" value="#<@@(data, '$codigo')>" maxlength="15" placeholder="<A>")
                     }
                     div(class="col-sm-8")
                     {

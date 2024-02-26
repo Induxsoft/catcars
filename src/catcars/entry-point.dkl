@@ -5,10 +5,11 @@ module "Controller configs"
 	#include "functions.dkh"
 	#include "serialize.dkh"
 	#include "dbr.dkh"
+	#include "dbr.vars.dkl"
+	#include "dbr.folios.dkl"
+	#include "dbr.security.dkl"
 	#include "config.dk"
 	#include "crudl/crudl.dk"
-	#include "dbr.vars.dkl"
-	#include "dbr.security.dkl"
 
 	if @@(@http_context,"$session/user/ids") == "" 
 	{

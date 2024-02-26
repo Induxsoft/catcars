@@ -50,7 +50,7 @@ module "form.dk"
                     div(class="col-sm-4")
                     {
                         small(class="fw-bold"){$"Código:"}
-                        input(type="text" class="induxsoft-form-control mb-2" name="codigo" value="#<@@(data, '$codigo')>" required="true" maxlength="15")
+                        input(type="text" class="induxsoft-form-control mb-2" name="codigo" value="#<@@(data, '$codigo')>" maxlength="15" placeholder="<A>")
                     }
                     div(class="col-sm-8")
                     {
@@ -63,7 +63,7 @@ module "form.dk"
                     div(class="col-md-4")
                     {
                         small(class="fw-bold"){$"Marca:"}
-                        select(class="induxsoft-form-select" id="marca" required="true")
+                        select(class="induxsoft-form-select" id="marca")
                         {$""
                             #! for i = 0; i < @count(@("&./marcas"))
                             {
@@ -75,7 +75,16 @@ module "form.dk"
                     div(class="col-md-4")
                     {
                         small(class="fw-bold"){$"Modelo:"}
-                        select(class="induxsoft-form-select" name="ref_car_modelo" id="ref_car_modelo" required="true"){$""}
+                        select(class="induxsoft-form-select" name="ref_car_modelo" id="ref_car_modelo" required="true")
+                        {$""
+                            #! for i = 0; i < @count(@("&./modelos"))
+                            {
+                                ref modelo=@item(@("&./modelos"),i)
+                                #$ option(value="#<@@(modelo,'sys_pk')>")
+                                {"#<@@(modelo,'$codigo')+' '+@@(modelo,'$descripcion')>"}
+                            }
+                        }
+                        
                     }
                     div(class="col-sm-4")
                     {

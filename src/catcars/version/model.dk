@@ -16,18 +16,34 @@ module ""
             INNER JOIN car_modelo m ON v.ref_car_modelo=m.sys_pk
         WHERE v.#<@keyfield> = @_entity_id;
     "
+
+    function check_autocode(&db,table,field,&data)
+    {
+        varvalue = dbr.vars.getd(db,"FXCA122","|0000")
+        ref config = dbr.autocode.info(varvalue)
+        new_code = dbr.autocode.new(db,table,field,config)
+
+        data<"codigo">: new_code
+
+        exception
+        { }
+    }
     
     prepareView::&db,&params,&rec
     {
-        if isnull(rec){return}
-         rec<"marcas*">:dbr.list(db,"select * from car_marca where ifnull(sys_deleted,0)=0",params)
+        if isnull(rec) { return }
+
+        rec<"marcas*">:dbr.list(db,"SELECT * FROM car_marca WHERE IFNULL(sys_deleted,0)=0",params)
+        rec<"modelos*">:dbr.list(db,"SELECT sys_pk, descripcion FROM car_modelo WHERE IFNULL(sys_deleted,0)=0",params)
     }
+
     blank::&db,&params
     {
        new entity{@"codigo":""}
        do prepareView(db,params,entity)
        return entity
     }
+
     read::&db,&params
     {
         if not(dbr.security.isauth(db,@CAT_AUT_VERSION_VEHICULO_READONLY)) { do rise_error(500,"No autorizado") }
@@ -43,18 +59,22 @@ module ""
 
         return entity.list(db, params)
     }
+
     function create(&db, &params, &data)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_CREATE_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }
 
-        return entity.create(db, params)
+        if @@(data,"codigo")=="" { do check_autocode(db,"car_version","codigo",data) }
+        return entity.create(db, params, data)
     }
+
     function update(&db, &params, &data)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }
 
-        return entity.update(db, params)
+        return entity.update(db, params, data)
     }
+    
     function delete(&db, &params)
     {
         if not(dbr.security.isauth(db,@CAT_AUT_DELETE_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }

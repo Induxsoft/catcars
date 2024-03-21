@@ -5,7 +5,7 @@ module "list.dk"
     #include "functions.dkh"
     #include "serialize.dkh"
     #include "uielements.v12.dkl"
-    #include "../config.dk"
+    #include "../_lib/config.dk"
 
     do @context.begin(@crud_context)
     // ref _db:@("&database")

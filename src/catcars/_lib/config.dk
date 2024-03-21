@@ -1,0 +1,52 @@
+#include "dkli.dkh"
+#!
+module "config"
+{
+    // =============== GENERAL
+
+    @URL_SEARCH_PRODUCTO = "/!/catcars/compatibilidad/?_view=buscar-producto&search=@search"
+    @URL_SEARCH_MARCA = "/!/catcars/compatibilidad/?_view=buscar-marca&search=@search"
+    @URL_SEARCH_MODELO = "/!/catcars/compatibilidad/?_view=buscar-modelo&search=@search"
+    @URL_SEARCH_VERSION = "/!/catcars/compatibilidad/?_view=buscar-version&search=@search"
+
+    // _STATIC
+    @JS_COMPATIBILIDAD = "/$/catcars/js/compatibilidad.js"
+
+    // _PACKAGE
+    @CATCARS_MARCA = "/!/catcars/marca/"
+    @CATCARS_MODELO = "/!/catcars/modelo/"
+    @CATCARS_VERSION = "/!/catcars/version/"
+    @CAR_COMPATIBILIDAD = "/!/catcars/compatibilidad/"
+
+    @CATCARS_ADD_EDIT_MARCA = "/!/catcars/marca/@id/"
+    @CATCARS_ADD_EDIT_MODELO="/!/catcars/modelo/@id/"
+    @CATCARS_ADD_EDIT_VERSION = "/!/catcars/version/@id/"
+
+    @default_max_rows=250
+
+    @icon_color = "#888"
+
+    @CAT_AUT_ACCESS_COMPATIBILIDAD_PARTES = "CVC-00-00-000"
+	@CAT_AUT_COMPATIBILIDAD_PARTES_READONLY = "CVC-00-00-001"
+	@CAT_AUT_CREATE_COMPATIBILIDAD_PARTES = "CVC-00-00-002"
+	@CAT_AUT_UPDATE_COMPATIBILIDAD_PARTES = "CVC-00-00-003"
+	@CAT_AUT_DELETE_COMPATIBILIDAD_PARTES = "CVC-00-00-004"
+
+    @CAT_AUT_ACCESS_MARCA_VEHICULO = "CVM-00-00-000"
+	@CAT_AUT_MARCA_VEHICULO_READONLY = "CVM-00-00-001"
+	@CAT_AUT_CREATE_MARCA_VEHICULO = "CVM-00-00-002"
+	@CAT_AUT_UPDATE_MARCA_VEHICULO = "CVM-00-00-003"
+	@CAT_AUT_DELETE_MARCA_VEHICULO = "CVM-00-00-004"
+
+    @CAT_AUT_ACCESS_MODELO_VEHICULO = "CDM-00-00-000"
+	@CAT_AUT_MODELO_VEHICULO_READONLY = "CDM-00-00-001"
+	@CAT_AUT_CREATE_MODELO_VEHICULO = "CDM-00-00-002"
+	@CAT_AUT_UPDATE_MODELO_VEHICULO = "CDM-00-00-003"
+	@CAT_AUT_DELETE_MODELO_VEHICULO = "CDM-00-00-004"
+
+    @CAT_AUT_ACCESS_VERSION_VEHICULO = "CVV-00-00-000"
+	@CAT_AUT_VERSION_VEHICULO_READONLY = "CVV-00-00-001"
+	@CAT_AUT_CREATE_VERSION_VEHICULO = "CVV-00-00-002"
+	@CAT_AUT_UPDATE_VERSION_VEHICULO = "CVV-00-00-003"
+	@CAT_AUT_DELETE_VERSION_VEHICULO = "CVV-00-00-004"
+}

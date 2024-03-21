@@ -8,8 +8,8 @@ module "Controller configs"
 	#include "dbr.vars.dkl"
 	#include "dbr.folios.dkl"
 	#include "dbr.security.dkl"
-	#include "config.dk"
 	#include "crudl/crudl.dk"
+	#include "_lib/config.dk"
 
 	if @@(@http_context,"$session/user/ids") == "" 
 	{

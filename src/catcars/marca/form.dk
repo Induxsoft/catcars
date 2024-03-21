@@ -4,7 +4,8 @@ module "form.dk"
 {
     #include "functions.dkh"
     #include "serialize.dkh"
-    #include "../config.dk"
+    #include "../_lib/config.dk"
+    #include "../_lib/icons.dk"
 
     do @context.begin(@crud_context)
 
@@ -27,7 +28,7 @@ module "form.dk"
                 }
                 div(class="col-8 d-flex align-items-center justify-content-end p-0 gap-2")
                 {
-                    a(href="./" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" title="Refrescar"){$"#<@@(@icons,'ARROW_CLOCKWISE')>"}
+                    a(href="./" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" title="Refrescar"){$"#<@ICON_ARROW_CLOCKWISE>"}
                     button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action"){
                         $'#<@@(@icons,"save2")>'
                     }

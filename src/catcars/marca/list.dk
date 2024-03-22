@@ -4,13 +4,15 @@ module "list"
 {
     #include "functions.dkh"
     #include "serialize.dkh"
+    #include "dbr.dkh"
     #include "../_lib/config.dk"
     #include "../_lib/icons.dk"
+    #include "../_lib/lib.dk"
 
     do @context.begin(@crud_context)
+    ref db:@("&database")
 
     ref marcas = @("&./")
-    
     #$
     div(class="container p-0")
     {
@@ -22,10 +24,13 @@ module "list"
             }
             div(class="col-8 d-flex align-items-center justify-content-end p-0 gap-2")
             {
-                // input(class="form-control form-control-sm rounded-0 d-none" type="file" name="car_marca_file" accept=".csv" id="car_marca_file")
-
                 a(href="./" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Refrescar"){$"#<@ICON_ARROW_CLOCKWISE>"}
-                // label(class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" "for"="car_marca_file" title="Importar marcas"){$"#<@ICON_FILE_CSV>"}
+                #!
+                if AppExist(db,"batch")
+                {
+                    #$ href(href="#" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar marcas"){$"#<@ICON_FILE_CSV>"}
+                }
+                #$
                 a(href="#<replace(@CATCARS_ADD_EDIT_MARCA, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
                 button(class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Imprimir" onclick="window.print()"){$"#<@ICON_PRINTER>"}
                 a(href="/" target="_top" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Salir"){$"#<@ICON_X_LG>"}

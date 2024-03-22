@@ -4,12 +4,13 @@ module "list.dk"
 {
     #include "functions.dkh"
     #include "serialize.dkh"
+    #include "dbr.dkh"
     #include "uielements.v12.dkl"
     #include "../_lib/config.dk"
+    #include "../_lib/icons.dk"
+    #include "../_lib/lib.dk"
 
     do @context.begin(@crud_context)
-    // ref _db:@("&database")
-    // ref _GET:@("&parameters")
 
     //#region DEFINICIÓN DE FILTROS SELECTS
     new fil_linea
@@ -120,6 +121,11 @@ module "list.dk"
     form_bar_buttons::
     {
         _btn_cls = "btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"
+
+        if AppExist(@("&database"),"batch")
+        {
+            #$ href(href="#" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar compatibilidades"){$"#<@ICON_FILE_CSV>"}
+        }
         #$
         a(href="./_new/" class="#<_btn_cls>"){$"Agregar"}
         a(href="#<@CATCARS_MARCA>" class="#<_btn_cls>"){$"Marcas"}

@@ -36,6 +36,7 @@ program "instalador"
     model_file = path.concat(path_ddm, model_name)
 
     import_marca_file = path.concat(path_initial_programs,"importar.marca.dkl")
+    import_marca_params = path.concat(path_initial_programs,"importar.marca.json")
 
     // Archivos de datos iniciales (Orden de instalación)
     ref files_to_import = from.json('[]')
@@ -197,10 +198,14 @@ program "instalador"
 
         ruta_programas = path.concat("_tasks",@@(data,"sys_guid")) 
         ruta_nuevo_archivo = path.concat(ruta_programas, "importar.marca.dkl")
-        programContent = file.rtext(import_marca_file)
+        ruta_nuevo_parametros = path.concat(ruta_programas, "importar.marca.json")
+
+        programContent1 = file.rtext(import_marca_file)
+        programContent2 = file.rtext(import_marca_params)
         
         do dir.ensure(ruta_programas)
-        do file.wtext(ruta_nuevo_archivo, programContent)
+        do file.wtext(ruta_nuevo_archivo, programContent1)
+        do file.wtext(ruta_nuevo_parametros, programContent2)
     }
 
     if dbr.is_open(database){ do dbr.close(database) }

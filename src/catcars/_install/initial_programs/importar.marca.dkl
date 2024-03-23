@@ -21,7 +21,7 @@ program
         ref data = CsvRead(data_file,"")
         
         for i=0; i<@count(data) {
-            ref itm = @item(data,i)
+            ref itm = record.caseinsensitive(@item(data,i))
 
             if ((length(@@(itm,"codigo"))<1 || length(@@(itm,"codigo"))>15) || (length(@@(itm,"descripcion"))<1 || length(@@(itm,"descripcion"))>50)) {
                 log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"

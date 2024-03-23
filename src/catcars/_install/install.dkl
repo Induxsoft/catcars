@@ -15,9 +15,10 @@ program "instalador"
     src = _get(@_run_settings,"$SourceCodeFile")
 
     path_install = dir.name(src)
+    path_app_info = path.concat(path_install,"app_info")
     path_ddm = path.concat(path_install,"ddm")
     path_initial_data = path.concat(path_install,"initial_data")
-    path_app_info = path.concat(path_install,"app_info")
+    path_initial_programs = path.concat(path_install,"initial_programs")
 
     qname = trim(@@(args,"$db"))
     if qname == "" { qname = trim(@@(args,"$bd")) }
@@ -33,6 +34,8 @@ program "instalador"
 
     model_name = file.name(dir.name(path_install)) + ".ddm"
     model_file = path.concat(path_ddm, model_name)
+
+    import_marca_file = path.concat(path_initial_programs,"importar.marca.dkl")
 
     // Archivos de datos iniciales (Orden de instalación)
     ref files_to_import = from.json('[]')
@@ -173,6 +176,31 @@ program "instalador"
 
         admins_groupid = dbr.security.admins(database)
         do dbr.security.assign(database,admins_groupid,permissions_to_import)
+    }
+
+    do print("\nCREANDO GRUPO DE TAREAS")
+
+    query1 = "SELECT name FROM jobsgroup WHERE name='CATCARS';"
+    query2 = "INSERT INTO jobsgroup (name, apikey, sys_guid, sys_timestamp) VALUES (@name, @apikey, @sys_guid, @sys_timestamp);"
+
+    duplicated = dbr.str(database, query1, @null)
+
+    if (duplicated == "") {
+        new data {
+            @"name": "CATCARS"
+            @"apikey": toupper(md5(uuid()))
+            @"sys_guid": uuid()
+            @"sys_timestamp*": now()
+        }
+
+        do dbr.execute(database,query2,data)
+
+        ruta_programas = path.concat("_tasks",@@(data,"sys_guid")) 
+        ruta_nuevo_archivo = path.concat(ruta_programas, "importar.marca.dkl")
+        programContent = file.rtext(import_marca_file)
+        
+        do dir.ensure(ruta_programas)
+        do file.wtext(ruta_nuevo_archivo, programContent)
     }
 
     if dbr.is_open(database){ do dbr.close(database) }

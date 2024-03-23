@@ -1,0 +1,48 @@
+#include "dkli.dkh"
+#!
+
+program
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "dbr.dkh"
+
+    src = _get(@_run_settings,"$SourceCodeFile")
+    path = dir.name(src)
+    data_file = path.concat(path,"data.csv")
+
+    ref lib_csv = _import_library("devkron.serialize.csv.dll")
+    do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
+
+    ref db = dbr.open("nuevaconexion@grupoapps")
+
+    query = "SELECT codigo, descripcion FROM car_marca WHERE codigo = @codigo"
+    query1 = "INSERT INTO car_marca (codigo, descripcion, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @sys_guid, @sys_timestamp)"
+    query2 = "UPDATE car_marca SET descripcion = @descripcion WHERE codigo = @codigo"
+    
+    if file.exists(data_file)
+    {
+        ref data = CsvRead(data_file,"")
+        
+        for i=0; i<@count(data)
+        {
+            ref itm = @item(data,i)
+
+            if ((length(@@(itm,"codigo"))<1 || length(@@(itm,"codigo"))>15) || (length(@@(itm,"descripcion"))<1 || length(@@(itm,"descripcion"))>50)) {
+                log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
+                do print(log)
+            } else {
+                duplicated =  dbr.str(db,query,itm)
+
+                if (duplicated != "") {
+                    do dbr.execute(db,query2,itm)
+                } else {
+                    itm<"sys_guid">: uuid()
+                    itm<"sys_timestamp*">: now()
+
+                    do dbr.execute(db,query1,itm)
+                }
+            }
+        }
+    }
+}

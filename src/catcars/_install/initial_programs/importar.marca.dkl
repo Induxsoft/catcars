@@ -13,9 +13,9 @@ program
     ref lib_csv = _import_library("devkron.serialize.csv.dll")
     do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
 
-    query = "SELECT codigo, descripcion FROM car_marca WHERE codigo = @codigo"
-    query1 = "INSERT INTO car_marca (codigo, descripcion, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @sys_guid, @sys_timestamp)"
-    query2 = "UPDATE car_marca SET descripcion = @descripcion WHERE codigo = @codigo"
+    query1 = "SELECT codigo FROM car_marca WHERE codigo = @codigo"
+    query2 = "INSERT INTO car_marca (codigo, descripcion, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @sys_guid, @sys_timestamp)"
+    query3 = "UPDATE car_marca SET descripcion = @descripcion WHERE codigo = @codigo"
     
     if file.exists(data_file) {
         ref data = CsvRead(data_file,"")
@@ -23,19 +23,22 @@ program
         for i=0; i<@count(data) {
             ref itm = record.caseinsensitive(@item(data,i))
 
-            if ((length(@@(itm,"codigo"))<1 || length(@@(itm,"codigo"))>15) || (length(@@(itm,"descripcion"))<1 || length(@@(itm,"descripcion"))>50)) {
+            codigo = length(@@(itm,"codigo"))
+            descripcion = length(@@(itm,"descripcion"))
+
+            if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50)) {
                 log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
                 do print(log)
             } else {
-                duplicated =  dbr.str(db,query,itm)
+                duplicated =  dbr.str(db,query1,itm)
 
                 if (duplicated != "") {
-                    do dbr.execute(db,query2,itm)
+                    do dbr.execute(db,query3,itm)
                 } else {
                     itm<"sys_guid">: uuid()
                     itm<"sys_timestamp*">: now()
 
-                    do dbr.execute(db,query1,itm)
+                    do dbr.execute(db,query2,itm)
                 }
             }
         }

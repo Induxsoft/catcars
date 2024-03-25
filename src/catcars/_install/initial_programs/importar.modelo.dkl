@@ -1,0 +1,53 @@
+#include "dkli.dkh"
+#!
+program
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "dbr.dkh"
+
+    ref db = @@(@batch_context,"&database")
+    data_file = @@(@batch_context,"$params/archivo")
+
+    ref lib_csv = _import_library("devkron.serialize.csv.dll")
+    do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
+
+    query1 = "SELECT codigo FROM car_marca WHERE sys_pk = @ref_car_marca"
+    query2 = "SELECT codigo FROM car_modelo WHERE codigo = @codigo"
+    query3 = "INSERT INTO car_modelo (codigo, descripcion, ref_car_marca, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @ref_car_marca, @sys_guid, @sys_timestamp)"
+    query4 = "UPDATE car_modelo SET descripcion = @descripcion, ref_car_marca = @ref_car_marca WHERE codigo = @codigo"
+    
+    if file.exists(data_file) {
+        ref data = CsvRead(data_file,"")
+        
+        for i=0; i<@count(data) {
+            ref itm = record.caseinsensitive(@item(data,i))
+
+            codigo = length(@@(itm,"codigo"))
+            descripcion = length(@@(itm,"descripcion"))
+            ref_car_marca = length(@@(itm,"ref_car_marca"))
+
+            if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50) || (ref_car_marca < 1 || ref_car_marca > 11)) {
+                log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
+                do print(log)
+            } else {
+                valid_ref_car_marca = dbr.str(db,query1,itm)
+
+                if (valid_ref_car_marca != "") {
+                    duplicated =  dbr.str(db,query2,itm)
+
+                    if (duplicated != "") {
+                        do dbr.execute(db,query4,itm)
+                    } else {
+                        itm<"sys_guid">: uuid()
+                        itm<"sys_timestamp*">: now()
+
+                        do dbr.execute(db,query3,itm)
+                    }
+                } else {
+                    do print("No existe una marca con ese valor")
+                }
+            }
+        }
+    }
+}

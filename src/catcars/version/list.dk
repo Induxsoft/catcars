@@ -11,8 +11,10 @@ module "list"
 
     do @context.begin(@crud_context)
     ref db:@("&database")
-
     ref marcas = @("&./")
+
+    query = "SELECT sys_pk FROM jobsgroup WHERE name = 'CATCARS';"
+    jg = dbr.num(db,query,@null)
     
     #$
     div(class="container p-0")
@@ -23,20 +25,33 @@ module "list"
             {
                 h5(class="tex-no-break m-0"){$"Versiones de vehículos"}
             }
+
             div(class="col-8 d-flex align-items-center justify-content-end p-0 gap-2")
             {
-                a(href="./" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Refrescar"){$"#<@ICON_ARROW_CLOCKWISE>"}
-                #!
-                if AppExist(db,"batch")
-                {
-                    #$ href(href="#" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar versiones"){$"#<@ICON_FILE_CSV>"}
+                a(href="./" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Refrescar") {
+                    $"#<@ICON_ARROW_CLOCKWISE>"
                 }
-                #$
-                a(href="#<replace(@CATCARS_ADD_EDIT_VERSION, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
-                button(class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Imprimir" onclick="window.print()"){$"#<@ICON_PRINTER>"}
-                a(href="/" target="_top" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Salir"){$"#<@ICON_X_LG>"}
+                
+                #! if AppExist(db,"batch") {
+                    #$ a(href="#<@BATCH_TASKMAN>#<jg>/importar.version?exit_url_encode=#<url_encode(@CATCARS_VERSION)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar versiones") {
+                        $"#<@ICON_FILE_CSV>"
+                    }
+                }
+                
+                #$ a(href="#<replace(@CATCARS_ADD_EDIT_VERSION, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print") {
+                    $"Agregar"
+                }
+
+                button(class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Imprimir" onclick="window.print()") {
+                    $"#<@ICON_PRINTER>"
+                }
+
+                a(href="/" target="_top" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Salir") {
+                    $"#<@ICON_X_LG>"
+                }
             }
         }
+
         div(id="work_area" class="container-section pt-2")
         {
             form(action="./" method="GET" id="form_search" class="d-flex mb-2 no-print")
@@ -47,6 +62,7 @@ module "list"
                     $"#<@ICON_SEARCH>"
                 }
             }
+
             div
             {
                 #! lenght = list.count(marcas)

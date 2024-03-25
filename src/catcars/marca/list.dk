@@ -31,7 +31,7 @@ module "list"
                 #!
                 if AppExist(db,"batch")
                 {
-                    #$ a(href="/!/batch/taskman/#<jg>/importar.marca" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar marcas"){$"#<@ICON_FILE_CSV>"}
+                    #$ a(href="#<@BATCH_TASKMAN>#<jg>/importar.marca?exit_url_encode=#<url_encode(@CATCARS_MARCA)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar marcas"){$"#<@ICON_FILE_CSV>"}
                 }
                 #$
                 a(href="#<replace(@CATCARS_ADD_EDIT_MARCA, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}

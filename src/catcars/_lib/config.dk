@@ -18,6 +18,8 @@ module "config"
     @CATCARS_VERSION = "/!/catcars/version/"
     @CAR_COMPATIBILIDAD = "/!/catcars/compatibilidad/"
 
+    @BATCH_TASKMAN="/!/batch/taskman/"
+
     @CATCARS_ADD_EDIT_MARCA = "/!/catcars/marca/@id/"
     @CATCARS_ADD_EDIT_MODELO="/!/catcars/modelo/@id/"
     @CATCARS_ADD_EDIT_VERSION = "/!/catcars/version/@id/"

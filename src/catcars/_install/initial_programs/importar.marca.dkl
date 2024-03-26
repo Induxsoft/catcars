@@ -14,13 +14,19 @@ program
     steps = @@(@batch_context,"#job/steps")
     data_file = @@(@batch_context,"$params/archivo")
 
+    if (right(data_file,4) != ".csv") {
+        do file.delete(data_file)
+        do batch.saveLog(token,"Extensión incorrecta del archivo, se esperaba un .csv")
+        return
+    }
+
     ref lib_csv = _import_library("devkron.serialize.csv.dll")
     do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
 
     query1 = "SELECT codigo FROM car_marca WHERE codigo = @codigo"
     query2 = "INSERT INTO car_marca (codigo, descripcion, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @sys_guid, @sys_timestamp)"
     query3 = "UPDATE car_marca SET descripcion = @descripcion WHERE codigo = @codigo"
-    
+
     if file.exists(data_file) {
         ref data = CsvRead(data_file,"")
         do file.delete(data_file)
@@ -56,8 +62,14 @@ program
             if (contador >= div) {
                 contador = contador - div
                 progreso = progreso + steps
-                do batch.saveLog(token,"[" + str(progreso) + "%]")
+                do batch.saveLog(token,"En proceso... " + str(progreso) + "%")
             }
+        }
+
+        exception 
+        {
+            do file.delete(data_file)
+            do batch.saveLog(token,last_error())
         }
     }
 }

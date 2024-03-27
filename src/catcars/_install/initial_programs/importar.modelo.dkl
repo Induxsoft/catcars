@@ -5,9 +5,20 @@ program
     #include "functions.dkh"
     #include "serialize.dkh"
     #include "dbr.dkh"
+    #include "batch.v12.dkl"
 
     ref db = @@(@batch_context,"&database")
+    ref @batchDB = db
+
+    token = @@(@batch_context,"$job/token")
+    steps = @@(@batch_context,"#job/steps")
     data_file = @@(@batch_context,"$params/archivo")
+
+    if (right(data_file,4) != ".csv") {
+        do file.delete(data_file)
+        do batch.saveLog(token,"Extensión incorrecta del archivo, se esperaba un .csv")
+        return
+    }
 
     ref lib_csv = _import_library("devkron.serialize.csv.dll")
     do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
@@ -16,11 +27,17 @@ program
     query2 = "SELECT codigo FROM car_modelo WHERE codigo = @codigo"
     query3 = "INSERT INTO car_modelo (codigo, descripcion, ref_car_marca, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @ref_car_marca, @sys_guid, @sys_timestamp)"
     query4 = "UPDATE car_modelo SET descripcion = @descripcion, ref_car_marca = @ref_car_marca WHERE codigo = @codigo"
-    
+
     if file.exists(data_file) {
         ref data = CsvRead(data_file,"")
+        do file.delete(data_file)
+
+        list_size = @count(data)
+        contador = 0
+        progreso = 0
+        div = (list_size/steps)
         
-        for i=0; i<@count(data) {
+        for i=0; i<list_size {
             ref itm = record.caseinsensitive(@item(data,i))
 
             codigo = length(@@(itm,"codigo"))
@@ -29,7 +46,7 @@ program
 
             if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50) || (ref_car_marca < 1 || ref_car_marca > 11)) {
                 log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
-                do print(log)
+                do batch.saveLog(token,log)
             } else {
                 valid_ref_car_marca = dbr.str(db,query1,itm)
 
@@ -48,6 +65,20 @@ program
                     do print("No existe una marca con ese valor")
                 }
             }
+
+            contador = contador + 1
+
+            if (contador >= div) {
+                contador = contador - div
+                progreso = progreso + steps
+                do batch.saveLog(token,"En proceso... " + str(progreso) + "%")
+            }
+        }
+
+        exception 
+        {
+            do file.delete(data_file)
+            do batch.saveLog(token,last_error())
         }
     }
 }

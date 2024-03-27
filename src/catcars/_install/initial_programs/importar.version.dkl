@@ -23,10 +23,10 @@ program
     ref lib_csv = _import_library("devkron.serialize.csv.dll")
     do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
 
-    query1 = "SELECT codigo FROM car_marca WHERE sys_pk = @ref_car_marca"
-    query2 = "SELECT codigo FROM car_modelo WHERE codigo = @codigo"
-    query3 = "INSERT INTO car_modelo (codigo, descripcion, ref_car_marca, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @ref_car_marca, @sys_guid, @sys_timestamp)"
-    query4 = "UPDATE car_modelo SET descripcion = @descripcion, ref_car_marca = @ref_car_marca WHERE codigo = @codigo"
+    query1 = "SELECT codigo FROM car_modelo WHERE sys_pk = @ref_car_modelo"
+    query2 = "SELECT codigo FROM car_version WHERE codigo = @codigo"
+    query3 = "INSERT INTO car_version (codigo, descripcion, ref_car_modelo, ano, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @ref_car_modelo, @ano, @sys_guid, @sys_timestamp)"
+    query4 = "UPDATE car_version SET descripcion = @descripcion, ref_car_modelo = @ref_car_modelo, ano = @ano WHERE codigo = @codigo"
 
     if file.exists(data_file) {
         ref data = CsvRead(data_file,"")
@@ -42,15 +42,16 @@ program
 
             codigo = length(@@(itm,"codigo"))
             descripcion = length(@@(itm,"descripcion"))
-            ref_car_marca = length(@@(itm,"ref_car_marca"))
+            ref_car_modelo = length(@@(itm,"ref_car_modelo"))
+            ano = length(@@(itm,"ano"))
 
-            if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50) || (ref_car_marca < 1 || ref_car_marca > 11)) {
-                log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
+            if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50) || (ref_car_modelo < 1 || ref_car_modelo > 11) || (ano < 1 || ano > 11)) {
+                log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "', descripcion = '" + @@(itm,"descripcion") + "' y año = '" + @@(itm,"ano") + "'"
                 do batch.saveLog(token,log)
             } else {
-                valid_ref_car_marca = dbr.str(db,query1,itm)
+                valid_ref_car_modelo = dbr.str(db,query1,itm)
 
-                if (valid_ref_car_marca != "") {
+                if (valid_ref_car_modelo != "") {
                     duplicated =  dbr.str(db,query2,itm)
 
                     if (duplicated != "") {
@@ -62,7 +63,7 @@ program
                         do dbr.execute(db,query3,itm)
                     }
                 } else {
-                    do batch.saveLog(token,"Error al insertar el registro con ref_car_marca = '" + @@(itm,"ref_car_marca") + "'")
+                    do batch.saveLog(token,"Error al insertar el registro con ref_car_modelo = '" + @@(itm,"ref_car_modelo") + "'")
                 }
             }
 

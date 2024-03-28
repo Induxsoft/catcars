@@ -11,6 +11,7 @@ module "list.dk"
     #include "../_lib/lib.dk"
 
     do @context.begin(@crud_context)
+    ref db:@("&database")
 
     //#region DEFINICIÓN DE FILTROS SELECTS
     new fil_linea
@@ -124,8 +125,13 @@ module "list.dk"
 
         if AppExist(@("&database"),"batch")
         {
-            #$ href(href="#" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar compatibilidades"){$"#<@ICON_FILE_CSV>"}
+            ref db:@("&database")
+            query = "SELECT sys_pk FROM jobsgroup WHERE name = 'CATCARS';"
+            jg = dbr.num(db,query,@null)
+
+            #$ a(href="#<@BATCH_TASKMAN>#<jg>/importar.compatibilidad?exit_url_encode=#<url_encode(@CAR_COMPATIBILIDAD)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar compatibilidades"){$"#<@ICON_FILE_CSV>"}
         }
+
         #$
         a(href="./_new/" class="#<_btn_cls>"){$"Agregar"}
         a(href="#<@CATCARS_MARCA>" class="#<_btn_cls>"){$"Marcas"}

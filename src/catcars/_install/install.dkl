@@ -44,6 +44,9 @@ program "instalador"
     import_version_program = path.concat(path_initial_programs,"importar.version.dkl")
     import_version_params = path.concat(path_initial_programs,"importar.version.json")
 
+    import_compatibilidad_program = path.concat(path_initial_programs,"importar.compatibilidad.dkl")
+    import_compatibilidad_params = path.concat(path_initial_programs,"importar.compatibilidad.json")
+
     // Archivos de datos iniciales (Orden de instalación)
     ref files_to_import = from.json('[]')
 	// Lista de permisos iniciales
@@ -215,6 +218,9 @@ program "instalador"
 
     import_version_program_content = file.rtext(import_version_program)
     import_version_params_content = file.rtext(import_version_params)
+
+    import_compatibilidad_program_content = file.rtext(import_compatibilidad_program)
+    import_compatibilidad_params_content = file.rtext(import_compatibilidad_params)
     
     do dir.ensure(path_jobsgroup)
     
@@ -226,6 +232,9 @@ program "instalador"
 
     do file.wtext(path_jobsgroup+"/importar.version.dkl", import_version_program_content)
     do file.wtext(path_jobsgroup+"/importar.version.json", import_version_params_content)
+
+    do file.wtext(path_jobsgroup+"/importar.compatibilidad.dkl", import_compatibilidad_program_content)
+    do file.wtext(path_jobsgroup+"/importar.compatibilidad.json", import_compatibilidad_params_content)
 
     if dbr.is_open(database){ do dbr.close(database) }
 

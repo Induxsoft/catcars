@@ -1,0 +1,89 @@
+#include "dkli.dkh"
+#!
+program
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "dbr.dkh"
+    #include "batch.v12.dkl"
+
+    ref db = @@(@batch_context,"&database")
+    ref @batchDB = db
+
+    token = @@(@batch_context,"$job/token")
+    steps = @@(@batch_context,"#job/steps")
+    data_file = @@(@batch_context,"$params/archivo")
+
+    if (right(data_file,4) != ".csv") {
+        do file.delete(data_file)
+        do batch.saveLog(token,"Extensión incorrecta del archivo, se esperaba un .csv")
+        return
+    }
+
+    ref lib_csv = _import_library("devkron.serialize.csv.dll")
+    do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
+
+    query1 = "SELECT codigo FROM producto WHERE sys_pk = @ref_producto"
+    query2 = "SELECT codigo FROM car_modelo WHERE sys_pk = @ref_modelo"
+    query3 = "SELECT codigo FROM car_version WHERE sys_pk = @ref_version"
+    query4 = "SELECT codigo FROM car_compatible WHERE ref_producto = @ref_producto;"
+    query5 = "INSERT INTO car_compatible (ref_producto, ref_modelo, ref_version, ano, sys_guid, sys_timestamp) VALUES (@ref_producto, @ref_modelo, @ref_version, @ano, @sys_guid, @sys_timestamp)"
+    query6 = "UPDATE car_compatible SET ref_modelo = @ref_modelo, ref_version = @ref_version, ano = @ano WHERE ref_producto = @ref_producto"
+
+    if file.exists(data_file) {
+        ref data = CsvRead(data_file,"")
+        do file.delete(data_file)
+
+        list_size = @count(data)
+        contador = 0
+        progreso = 0
+        div = (list_size/steps)
+        
+        for i=0; i<list_size {
+            ref itm = record.caseinsensitive(@item(data,i))
+
+            ref_producto = length(@@(itm,"ref_producto"))
+            ref_modelo = length(@@(itm,"ref_modelo"))
+            ref_version = length(@@(itm,"ref_version"))
+            ano = length(@@(itm,"ano"))
+
+            if ((ref_producto < 1 || ref_producto > 11) || (ref_modelo < 1 || ref_modelo > 11) || (ref_version < 1 || ref_version > 11) || (ano < 1 || ano > 11)) {
+                log = "Error al insertar el registro. Los valores ref_producto = '" + @@(itm,"ref_producto") + "', ref_modelo = '" + @@(itm,"ref_modelo") + "', ref_version = '" + @@(itm,"ref_version") + "' y año = '" + @@(itm,"ano") + "' son incorrectos."
+                do batch.saveLog(token,log)
+            } else {
+                valid_ref_producto = dbr.str(db,query1,itm)
+                valid_ref_modelo = dbr.str(db,query2,itm)
+                valid_ref_version = dbr.str(db,query4,itm)
+
+                if (valid_ref_producto != "" && valid_ref_version != "" && valid_ref_version != "") {
+                    duplicated =  dbr.str(db,query4,itm)
+
+                    if (duplicated != "") {
+                        do dbr.execute(db,query6,itm)
+                    } else {
+                        itm<"sys_guid">: uuid()
+                        itm<"sys_timestamp*">: now()
+
+                        do dbr.execute(db,query5,itm)
+                    } 
+                } else {
+                    do batch.saveLog(token,"Error al insertar el registro. No existe un ref_producto = '" + @@(itm,"ref_producto") + "', ref_modelo = '" + @@(itm,"ref_modelo") + "' o un ref_version = '" + @@(itm,"ref_version") + "' con esos valores.")
+                }
+            }
+
+            contador = contador + 1
+
+            if (contador >= div) {
+                contador = contador - div
+                progreso = progreso + steps
+                do batch.saveLog(token,"En proceso... " + str(progreso) + "%")
+            }
+        }
+
+        exception 
+        {
+            do file.delete(data_file)
+            do batch.saveLog(token,last_error())
+        }
+    }
+}

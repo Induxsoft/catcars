@@ -23,7 +23,7 @@ program
     ref lib_csv = _import_library("devkron.serialize.csv.dll")
     do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
 
-    query1 = "SELECT codigo FROM car_marca WHERE sys_pk = @ref_car_marca"
+    query1 = "SELECT sys_pk FROM car_marca WHERE codigo = @ref_car_marca"
     query2 = "SELECT codigo FROM car_modelo WHERE codigo = @codigo"
     query3 = "INSERT INTO car_modelo (codigo, descripcion, ref_car_marca, sys_guid, sys_timestamp) VALUES (@codigo, @descripcion, @ref_car_marca, @sys_guid, @sys_timestamp)"
     query4 = "UPDATE car_modelo SET descripcion = @descripcion, ref_car_marca = @ref_car_marca WHERE codigo = @codigo"
@@ -45,13 +45,15 @@ program
             ref_car_marca = length(@@(itm,"ref_car_marca"))
 
             if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50) || (ref_car_marca < 1 || ref_car_marca > 11)) {
-                log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
+                log = "Error al insertar el registro. Los valores codigo = '" + @@(itm,"codigo") + "', descripcion = '" + @@(itm,"descripcion") + "' y ref_car_marca = '" + @@(itm,"ref_car_marca") + "' son incorrectos."
                 do batch.saveLog(token,log)
             } else {
                 valid_ref_car_marca = dbr.str(db,query1,itm)
 
                 if (valid_ref_car_marca != "") {
                     duplicated =  dbr.str(db,query2,itm)
+
+                    itm<"ref_car_marca">: valid_ref_car_marca
 
                     if (duplicated != "") {
                         do dbr.execute(db,query4,itm)
@@ -62,7 +64,7 @@ program
                         do dbr.execute(db,query3,itm)
                     }
                 } else {
-                    do batch.saveLog(token,"Error al insertar el registro con ref_car_marca = '" + @@(itm,"ref_car_marca") + "'")
+                    do batch.saveLog(token,"Error al insertar el registro. No existe un ref_car_marca = '" + @@(itm,"ref_car_marca") + "' con ese valor.")
                 }
             }
 

@@ -45,9 +45,14 @@ program
             ref_car_modelo = length(@@(itm,"ref_car_modelo"))
             ano = length(@@(itm,"ano"))
 
-            if ((codigo < 1 || codigo > 15) || (descripcion < 1 || descripcion > 50) || (ref_car_modelo < 1 || ref_car_modelo > 11) || (ano < 1 || ano > 11)) {
-                log = "Error al insertar el registro. Los valores codigo = '" + @@(itm,"codigo") + "', descripcion = '" + @@(itm,"descripcion") + "', ref_car_modelo = '" + @@(itm,"ref_car_modelo") + "' y año = '" + @@(itm,"ano") + "' son incorrectos."
-                do batch.saveLog(token,log)
+            if (codigo < 1 || codigo > 15) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El código (" + @@(itm,"codigo") + ") debe ser de mínimo 1 caracter y máximo 15 caracteres.")
+            } else if (descripcion < 1 || descripcion > 50) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La descripción (" + @@(itm,"descripcion") + ") debe ser de mínimo 1 caracter y máximo 50 caracteres.")
+            } else if (ref_car_modelo < 1 || ref_car_modelo > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La ref_car_modelo (" + @@(itm,"ref_car_modelo") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if(ano < 1 || ano > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El año (" + @@(itm,"ano") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else {
                 valid_ref_car_modelo = dbr.str(db,query1,itm)
 
@@ -65,7 +70,7 @@ program
                         do dbr.execute(db,query3,itm)
                     }
                 } else {
-                    do batch.saveLog(token,"Error al insertar el registro. No existe un ref_car_modelo = '" + @@(itm,"ref_car_modelo") + "' con ese valor.")
+                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un ref_car_modelo (" + @@(itm,"ref_car_modelo") + ") con ese valor.")
                 }
             }
 

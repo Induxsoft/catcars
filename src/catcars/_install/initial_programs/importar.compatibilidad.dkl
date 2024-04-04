@@ -47,9 +47,14 @@ program
             ref_version = length(@@(itm,"ref_version"))
             ano = length(@@(itm,"ano"))
 
-            if ((ref_producto < 1 || ref_producto > 11) || (ref_modelo < 1 || ref_modelo > 11) || (ref_version < 1 || ref_version > 11) || (ano < 1 || ano > 11)) {
-                log = "Error al insertar el registro. Los valores ref_producto = '" + @@(itm,"ref_producto") + "', ref_modelo = '" + @@(itm,"ref_modelo") + "', ref_version = '" + @@(itm,"ref_version") + "' y año = '" + @@(itm,"ano") + "' son incorrectos."
-                do batch.saveLog(token,log)
+            if (ref_producto < 1 || ref_producto > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El ref_producto (" + @@(itm,"ref_producto") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (ref_modelo < 1 || ref_modelo > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El ref_modelo (" + @@(itm,"ref_modelo") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (ref_version < 1 || ref_version > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La ref_version (" + @@(itm,"ref_version") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if(ano < 1 || ano > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El año (" + @@(itm,"ano") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else {
                 valid_ref_producto = dbr.str(db,query1,itm)
                 valid_ref_modelo = dbr.str(db,query2,itm)
@@ -73,10 +78,10 @@ program
                             do dbr.execute(db,query5,itm)
                         }
                     } else {
-                        do batch.saveLog(token,"Error al insertar el registro. No existe un ref_producto = '" + @@(itm,"ref_producto") + "' o un ref_version = '" + @@(itm,"ref_version") + "' con esos valores.")
+                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un ref_producto (" + @@(itm,"ref_producto") + ") o un ref_version (" + @@(itm,"ref_version") + ") con esos valores.")
                     }
                 } else {
-                    do batch.saveLog(token,"Error al insertar el registro. No existe un ref_modelo = '" + @@(itm,"ref_modelo") + "' con ese valor.")
+                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un ref_modelo (" + @@(itm,"ref_modelo") + ") con ese valor.")
                 }
             }
 

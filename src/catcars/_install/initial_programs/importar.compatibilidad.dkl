@@ -27,7 +27,7 @@ program
     query2 = "SELECT sys_pk FROM car_modelo WHERE codigo = @ref_modelo"
     query3 = "SELECT sys_pk FROM car_version WHERE codigo = @ref_version AND ref_car_modelo = @ref_modelo;"
     query4 = "SELECT sys_pk FROM car_compatible WHERE ref_version = @ref_version"
-    query5 = "INSERT INTO car_compatible (ref_producto, ref_modelo, ref_version, ano, sys_guid, sys_timestamp) VALUES (@ref_producto, @ref_modelo, @ref_version, @ano, @sys_guid, @sys_timestamp)"
+    query5 = "INSERT INTO car_compatible (ref_producto, ref_modelo, ref_version, ano, sys_guid, sys_dtcreated, sys_timestamp, sys_recver) VALUES (@ref_producto, @ref_modelo, @ref_version, @ano, @sys_guid, @sys_dtcreated, @sys_timestamp, @sys_recver)"
     query6 = "UPDATE car_compatible SET ref_producto = @ref_producto, ref_modelo = @ref_modelo, ano = @ano WHERE ref_version = @ref_version"
 
     if file.exists(data_file) {
@@ -56,16 +56,23 @@ program
             } else if(ano < 1 || ano > 11) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El año (" + @@(itm,"ano") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else {
-                valid_ref_producto = dbr.str(db,query1,itm)
-                valid_ref_modelo = dbr.str(db,query2,itm)
+                id_ref_modelo = dbr.str(db,query2,itm)
 
-                if (valid_ref_modelo != "") {
-                    itm<"ref_modelo">: valid_ref_modelo
-                    valid_ref_version = dbr.str(db,query3,itm)
+                if (id_ref_modelo != "") {
+                    ref_modelo_value = @@(itm,"ref_modelo")
+                    itm<"ref_modelo">: id_ref_modelo
+                    id_ref_producto = dbr.str(db,query1,itm)
 
-                    if (valid_ref_producto != "" && valid_ref_version != "") {
-                        itm<"ref_producto">: valid_ref_producto
-                        itm<"ref_version">: valid_ref_version
+                    if (id_ref_producto != "") {
+                        itm<"ref_producto">: id_ref_producto
+                        id_ref_version = dbr.str(db,query3,itm)
+
+                        if (id_ref_version == "") {
+                            do batch.saveLog(token,"No existe un ref_version (" + @@(itm,"ref_version") + ") asociado al ref_modelo (" + ref_modelo_value + "). Se le ha asignado nulo.")
+                            itm<"ref_version*">: @null
+                        } else {
+                            itm<"ref_version">: id_ref_version
+                        }
 
                         duplicated =  dbr.str(db,query4,itm)
 
@@ -73,12 +80,14 @@ program
                             do dbr.execute(db,query6,itm)
                         } else {
                             itm<"sys_guid">: uuid()
+                            itm<"sys_dtcreated*">: now()
                             itm<"sys_timestamp*">: now()
+                            itm<"sys_recver">: 0
 
                             do dbr.execute(db,query5,itm)
                         }
                     } else {
-                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un ref_producto (" + @@(itm,"ref_producto") + ") o un ref_version (" + @@(itm,"ref_version") + ") con esos valores.")
+                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un ref_producto (" + @@(itm,"ref_producto") + ") con ese valor.")
                     }
                 } else {
                     do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un ref_modelo (" + @@(itm,"ref_modelo") + ") con ese valor.")

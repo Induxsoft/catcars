@@ -1,0 +1,43 @@
+[
+    {
+        "id": "catcars",
+        "caption": "Catálogos relacionados a la industria automotríz",
+        "help": "Variables del paquete: catcars",
+        "vars": 
+        [
+            {
+                "varname": "FXCA120",
+                "vardefault": "|0000",
+                "varvalue": "|0000",
+                "varcaption": "Formato para el autocódigo(marca)",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            },
+            {
+                "varname": "FXCA121",
+                "vardefault": "|0000",
+                "varvalue": "|0000",
+                "varcaption": "Formato para el autocódigo(modelo)",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            },
+            {
+                "varname": "FXCA122",
+                "vardefault": "|0000",
+                "varvalue": "|0000",
+                "varcaption": "Formato para el autocódigo(versión)",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            }
+        ]
+    }
+]

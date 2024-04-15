@@ -37,7 +37,7 @@ module "form.dk"
                         $"#<@ICON_SAVE>"
                     }
 
-                    a(class="btn btn-sm border-secondary induxsoft-corners btn-main-action" href="#<@CATCARS_MARCA>") {
+                    a(class="btn btn-sm border-secondary induxsoft-corners btn-main-action" href="#<@CATCARS_MODELO>") {
                         $"#<@ICON_X_LG>"
                     }
                 }

@@ -5,6 +5,7 @@ module "list.dk"
     #include "functions.dkh"
     #include "serialize.dkh"
     #include "dbr.dkh"
+    #include "dbr.apps.dkl"
     #include "uielements.v12.dkl"
     #include "../_lib/config.dk"
     #include "../_lib/icons.dk"
@@ -125,11 +126,10 @@ module "list.dk"
 
         if AppExist(@("&database"),"batch")
         {
-            ref db:@("&database")
-            query = "SELECT sys_pk FROM jobsgroup WHERE name = 'CATCARS';"
-            jg = dbr.num(db,query,@null)
+            ref act = dbr.apps.itemaction.get(@("&database"),"CC44")
+            href_act = path.concat(@@(act,"$href"),"?exit_url_encode="+url_encode(@CAR_COMPATIBILIDAD))
 
-            #$ a(href="#<@BATCH_TASKMAN>#<jg>/importar.compatibilidad?exit_url_encode=#<url_encode(@CAR_COMPATIBILIDAD)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar compatibilidades"){$"#<@ICON_FILE_CSV>"}
+            #$ a(href="#<href_act>" class="#<_btn_cls>" title="Importar compatibilidad de partes"){$"Importar"}
         }
 
         #$

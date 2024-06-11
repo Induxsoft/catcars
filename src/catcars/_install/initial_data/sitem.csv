@@ -1,22 +1,26 @@
 ﻿itemid,description,itemparent
-orgcat,Organización de catálogos,\0
-orgcat.grupos,Grupos de productos y recetas,orgcat
-CG10,Grupos,orgcat.grupos
-CG11,Agregar grupo,orgcat.grupos
-CG12,Editar grupo,orgcat.grupos
-CG13,Eliminar grupo,orgcat.grupos
-orgcat.lincc,Asociar lineas a centro de consumo,orgcat
-CG20,Vincular líneas a centros de consumo,orgcat.lincc
-CG21,Agregar línea y centro de consumo,orgcat.lincc
-CG22,Editar línea y centro de consumo,orgcat.lincc
-CG23,Eliminar línea y centro de consumo,orgcat.lincc
-orgcat.orgrupos,Organizar grupos de productos y recetas,orgcat
-CG30,Vincular productos y recetas a grupos,orgcat.orgrupos
-CG31,Agregar asociación de producto o receta a grupo,orgcat.orgrupos
-CG32,Editar asociación de producto o receta a grupo,orgcat.orgrupos
-CG33,Eliminar asosiación de producto o receta a grupo,orgcat.orgrupos
-orgcat.prodcc,Productos a centros de consumo,orgcat
-CG40,Vincular grupos a centros de consumo,orgcat.prodcc
-CG41,Agregar grupo de producto y centro de consumo,orgcat.prodcc
-CG42,Editar grupo de producto y centro de consumo,orgcat.prodcc
-CG43,Eliminar grupo de producto y centro de consumo,orgcat.prodcc
+catcars,Catálogos relacionados a la industria automotríz,\0
+catcars.marca,Marcas de vehículos,catcars
+CC10,Marcas de vehículos,catcars.marca
+CC11,Agregar marca de vehículo,catcars.marca
+CC12,Editar marca de vehículo,catcars.marca
+CC13,Eliminar marca de vehículo,catcars.marca
+CC14,Importar marcas de vehículos,catcars.marca
+catcars.modelo,Modelos de vehículos,catcars
+CC20,Modelos de vehículos,catcars.modelo
+CC21,Agregar modelo de vehículo,catcars.modelo
+CC22,Editar modelo de vehículo,catcars.modelo
+CC23,Eliminar modelo de vehículo,catcars.modelo
+CC24,Importar modelos de vehículos,catcars.modelo
+catcars.version,Versiones de vehículos,catcars
+CC30,Versiones de vehículos,catcars.version
+CC31,Agregar versión de vehículo,catcars.version
+CC32,Editar versión de vehículo,catcars.version
+CC33,Eliminar versión de vehículo,catcars.version
+CC34,Importar versiones de vehículos,catcars.version
+catcars.compatibilidad,"Compatibilidad de partes ",catcars
+CC40,Compatibilidad de partes,catcars.compatibilidad
+CC41,Agregar compatibilidad de partes,catcars.compatibilidad
+CC42,Editar compatibilidad de partes,catcars.compatibilidad
+CC43,Eliminar compatibilidad de partes,catcars.compatibilidad
+CC44,Importar compatibilidades de partes,catcars.compatibilidad

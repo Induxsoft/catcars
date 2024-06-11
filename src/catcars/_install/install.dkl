@@ -11,28 +11,7 @@ program "instalador"
     ref @files_to_import = from.json('[]')
 
     // Lista de privilegios iniciales (arreglo de id de privilegios)
-    ref @permissions_to_import = from.json('[
-        "CVC-00-00-000",
-        "CVC-00-00-001",
-        "CVC-00-00-002",
-        "CVC-00-00-003",
-        "CVC-00-00-004",
-        "CVM-00-00-000",
-        "CVM-00-00-001",
-        "CVM-00-00-002",
-        "CVM-00-00-003",
-        "CVM-00-00-004",
-        "CDM-00-00-000",
-        "CDM-00-00-001",
-        "CDM-00-00-002",
-        "CDM-00-00-003",
-        "CDM-00-00-004",
-        "CVV-00-00-000",
-        "CVV-00-00-001",
-        "CVV-00-00-002",
-        "CVV-00-00-003",
-        "CVV-00-00-004"
-    ]')
+    ref @permissions_to_import = from.json('[]')
 
     // Id del grupo de tareas (recomendado: prefijo del paquete), si se omite se calculará automáticamente.
     // https://docs.induxsoft.net/es/productos/v12/devops/official-v12-packs.dkl

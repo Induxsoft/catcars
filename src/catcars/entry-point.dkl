@@ -10,7 +10,8 @@ module "Controller configs"
 	#include "dbr.security.dkl"
 	#include "crudl/crudl.dk"
 	#include "_lib/config.dk"
-
+	#include "dbr.events.dkl"
+	#include "dbr.apps.dkl"
 	if @@(@http_context,"$session/user/ids") == "" 
 	{
 		@http_context<"response/headers/location"> : "/"

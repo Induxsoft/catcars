@@ -159,7 +159,7 @@ module ""
 
     car.list::&db,&params
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+        do dbr.apps.action.grant("CC40")
 
         new data
         {
@@ -190,13 +190,13 @@ module ""
 
         data<"list*"> : entity.list(db,params)
         
-        // do rise_error(0,@list_query)
         return data
+        exception{ do catch(db,params,@null) }
     }
 
     car.read::&db,&params
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_COMPATIBILIDAD_PARTES_READONLY)) { do rise_error(500,"No autorizado") }
+        do dbr.apps.action.grant("CC40")
 
         new data
         {
@@ -205,13 +205,18 @@ module ""
         do prepareView(db,params,data)
 
         return data
+        exception{ do catch(db,params,@null) }
     }
 
     car.blank::&db,&params
     {
+        do dbr.apps.action.grant("CC40")
+
         new data {}
         do prepareView(db,params,data)
+        
         return data
+        exception{ do catch(db,params,@null) }
     }
 
     car.vData::&db,&params,&data
@@ -235,56 +240,79 @@ module ""
 
     car.create::&db,&params,&data
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_CREATE_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        do errordet(@false)
+        do dbr.apps.action.pre("CC41")
+        do dbr.begin(db)
+
         ref car_compatible = car.vData(db,params,data)
-        do entity.create(db,params,car_compatible)
+        ref entity = entity.create(db,params,car_compatible)
 
-        exception
-        {
-            if dbr.in_transaction(db) { do dbr.rollback(db) }
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
 
-            ref formData = record.copy(data,"*")
-            code = last_error_code()
-            error = last_error()
-
-            do record.clear(data)
-            data<"form*"> : formData
-            
-            do prepareView(db,params,data)
-            do rise_error(code,error)
-        }
+        return entity
+        exception{ do catch(db,params,data) }
     }
 
     car.update::&db,&params,&data
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        do errordet(@false)
+        do dbr.apps.action.pre("CC42")
+        do dbr.begin(db)
+
         ref car_compatible = car.vData(db,params,data)
-        do entity.update(db,params,car_compatible)
+        ref entity = entity.update(db,params,car_compatible)
 
-        exception
-        {
-            if dbr.in_transaction(db) { do dbr.rollback(db) }
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
 
-            ref formData = record.copy(data,"*")
-            code = last_error_code()
-            error = last_error()
-
-            do record.clear(data)
-            data<"form*"> : formData
-            
-            do prepareView(db,params,data)
-            do rise_error(code,error)
-        }
+        return entity
+        exception{ do catch(db,params,data) }
     }
 
-    function car.delete(&db, &params)
+    car.delete::&db,&params
 	{
-        if not(dbr.security.isauth(db,@CAT_AUT_DELETE_COMPATIBILIDAD_PARTES)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        return entity.delete(db, params)
+        do dbr.apps.action.pre("CC43")
+        do dbr.begin(db)
+
+        ref entity = entity.delete(db,params)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,@null) }
 	}
+
+    catch::&db,&params,&data
+    {
+        //#region catch
+        do errordet(@false)
+        code = last_error_code()
+        error = last_error()
+
+        if dbr.in_transaction(db) { do dbr.rollback(db) }
+        if isset("@@_action_context") { do dbr.apps.action.log() }
+
+        if @@(params,"$_operation")=="create" || @@(params,"$_operation")=="update"
+        {
+            if isnull(data) { ref data:record.create() }
+            if contains(error,"Duplicate entry") { error = "Entrada duplicada, ya existe un registro con los mismos valores." }
+
+            ref FormData = record.copy(data,"*")
+            do record.clear(data)
+            data<"form*"> : FormData
+            
+            do prepareView(db,params,data)
+        }
+        
+        do rise_error(code,error)
+    }
 }

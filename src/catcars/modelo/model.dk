@@ -16,8 +16,7 @@ module ""
 
         data<"codigo">: new_code
 
-        exception
-        { }
+        exception{do pop_exception()}
     }
 
     prepareView::&db,&params,&rec
@@ -25,50 +24,110 @@ module ""
         if isnull(rec){return}
         rec<"marcas*">:dbr.list(db,"select * from car_marca where ifnull(sys_deleted,0)=0",params)
     }
-
-    blank::&db,&params
-    {
-       new entity{@"codigo":""}
-       do prepareView(db,params,entity)
-       return entity
-    }
-
-    read::&db,&params
-    {
-        if not(dbr.security.isauth(db,@CAT_AUT_MODELO_VEHICULO_READONLY)) { do rise_error(500,"No autorizado") }
-
-        ref entity=entity.read(db,params)
-        do prepareView(db,params,entity)
-        return entity
-    }
     
     function list(&db, &params)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
-
+        do dbr.apps.action.grant("CC20")
         return entity.list(db, params)
+        exception{ do catch(db,params,@null) }
+    }
+
+    function read(&db,&params)
+    {
+        do dbr.apps.action.grant("CC20")
+
+        ref entity=entity.read(db,params)
+        do prepareView(db,params,entity)
+        
+        return entity
+        exception{ do catch(db,params,@null) }
+    }
+
+    blank::&db,&params
+    {
+        do dbr.apps.action.grant("CC20")
+
+        new entity{@"codigo":""}
+        do prepareView(db,params,entity)
+        
+        return entity
+        exception{ do catch(db,params,@null) }
     }
 
     function create(&db, &params, &data)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_CREATE_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
+
+        do dbr.apps.action.pre("CC21")
+        do dbr.begin(db)
 
         if @@(data,"codigo")=="" { do check_autocode(db,"car_modelo","codigo",data) }
-        return entity.create(db, params, data)
+        ref entity = entity.create(db, params, data)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,data) }
     }
 
     function update(&db, &params, &data)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        return entity.update(db, params, data)
+        do dbr.apps.action.pre("CC22")
+        do dbr.begin(db)
+
+        ref entity = entity.update(db, params, data)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,data) }
     }
 
     function delete(&db, &params)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_DELETE_MODELO_VEHICULO)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        return entity.delete(db, params)
+        do dbr.apps.action.pre("CC23")
+        do dbr.begin(db)
+
+        ref entity = entity.delete(db, params)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,@null) }
+    }
+
+    catch::&db,&params,&data
+    {
+        do errordet(@false)
+        code = last_error_code()
+        error = last_error()
+
+        if dbr.in_transaction(db) { do dbr.rollback(db) }
+        if isset("@@_action_context") { do dbr.apps.action.log() }
+
+        if @@(params,"$_operation")=="create" || @@(params,"$_operation")=="update"
+        {
+            if isnull(data) { ref data:record.create() }
+            if contains(error,"Duplicate entry") { error = "Entrada duplicada, ya existe un registro con los mismos valores." }
+
+            // ref FormData = record.copy(data,"*")
+            // do record.clear(data)
+            // data<"form*"> : FormData
+            
+            do prepareView(db,params,data)
+        }
+        
+        do rise_error(code,error)
     }
 
     point @read to read

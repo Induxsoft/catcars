@@ -25,8 +25,7 @@ module ""
 
         data<"codigo">: new_code
 
-        exception
-        { }
+        exception{do pop_exception()}
     }
     
     prepareView::&db,&params,&rec
@@ -37,49 +36,109 @@ module ""
         rec<"modelos*">:dbr.list(db,"SELECT sys_pk, descripcion FROM car_modelo WHERE IFNULL(sys_deleted,0)=0",params)
     }
 
-    blank::&db,&params
+    function list(&db, &params)
     {
-       new entity{@"codigo":""}
-       do prepareView(db,params,entity)
-       return entity
+        do dbr.apps.action.grant("CC30")
+        return entity.list(db, params)
+        exception{ do catch(db,params,@null) }
     }
 
-    read::&db,&params
+    function read(&db,&params)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_VERSION_VEHICULO_READONLY)) { do rise_error(500,"No autorizado") }
+        do dbr.apps.action.grant("CC30")
 
         ref entity = entity.read(db,params)
         do prepareView(db,params,entity)
+        
         return entity
+        exception{ do catch(db,params,@null) }
     }
 
-    function list(&db, &params)
+    function blank(&db,&params)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_ACCESS_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }
+        do dbr.apps.action.grant("CC30")
 
-        return entity.list(db, params)
+       new entity{@"codigo":""}
+       do prepareView(db,params,entity)
+       
+       return entity
+       exception{ do catch(db,params,@null) }
     }
 
     function create(&db, &params, &data)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_CREATE_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
+
+        do dbr.apps.action.pre("CC31")
+        do dbr.begin(db)
 
         if @@(data,"codigo")=="" { do check_autocode(db,"car_version","codigo",data) }
-        return entity.create(db, params, data)
+        ref entity = entity.create(db, params, data)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,data) }
     }
 
     function update(&db, &params, &data)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_UPDATE_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        return entity.update(db, params, data)
+        do dbr.apps.action.pre("CC32")
+        do dbr.begin(db)
+
+        ref entity = entity.update(db, params, data)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,data) }
     }
     
     function delete(&db, &params)
     {
-        if not(dbr.security.isauth(db,@CAT_AUT_DELETE_VERSION_VEHICULO)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
 
-        return entity.delete(db, params)
+        do dbr.apps.action.pre("CC33")
+        do dbr.begin(db)
+
+        ref entity = entity.delete(db, params)
+
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
+
+        return entity
+        exception{ do catch(db,params,@null) }
+    }
+
+    catch::&db,&params,&data
+    {
+        do errordet(@false)
+        code = last_error_code()
+        error = last_error()
+
+        if dbr.in_transaction(db) { do dbr.rollback(db) }
+        if isset("@@_action_context") { do dbr.apps.action.log() }
+
+        if @@(params,"$_operation")=="create" || @@(params,"$_operation")=="update"
+        {
+            if isnull(data) { ref data:record.create() }
+            if contains(error,"Duplicate entry") { error = "Entrada duplicada, ya existe un registro con los mismos valores." }
+
+            // ref FormData = record.copy(data,"*")
+            // do record.clear(data)
+            // data<"form*"> : FormData
+            
+            do prepareView(db,params,data)
+        }
+        
+        do rise_error(code,error)
     }
 
     point @read to read

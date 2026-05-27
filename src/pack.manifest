@@ -1,0 +1,6 @@
+{
+	"id":"catcars",
+	"installable":["catcars"],
+	"version":"1.0.47",
+	"schema_ver":"1.0.10"
+}
